@@ -5,7 +5,7 @@ project.
 ## Set it up
 1. `virtualenv venv`
 2. `source venv/bin/activate`
-3. `sudo pip install -r requirements.txt`
+3. `[sudo] pip install -r requirements.txt`
 4. `heroku config -s > .env`
 
 ## Run it!
