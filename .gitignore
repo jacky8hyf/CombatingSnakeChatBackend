@@ -121,3 +121,6 @@ db.sqlite3
 
 # Virtual Environment
 /venv
+
+# Heroku environment variables
+.env
