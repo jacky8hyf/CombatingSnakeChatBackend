@@ -91,5 +91,9 @@ def outbox(ws):
         # Context switch while `ChatBackend.start` is running in the background.
         gevent.sleep()
 
-
+@sockets.route('/echo')
+def echo_socket(ws):
+    while True:
+        message = ws.receive()
+        ws.send(message)
 
