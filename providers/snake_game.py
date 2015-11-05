@@ -5,9 +5,8 @@ __author__ = 'TrevorTa'
 
 class Board:
     # ==================== SERVER UTILITIES ============================
-    # Notes: players are numbered from 1 to numPlayers.
     # Create a board:
-    #   board = Board(width, height, numPlayers)
+    #   board = Board(width, height, playerIDs)
     #   board.initializeBoard() # add (numPlayers) random snakes of length 1
     #                             and (numPlayers - 1) foods
     def getGameState(self):
@@ -52,16 +51,17 @@ class Board:
         Initialize the game
         :param w: width of the board
         :param h: height of the board
-        :param players: number of players (ASSUME players < 8 AT THE MOMENT)
+        :param players: list of player IDs
         """
-        assert players <= 8
-        assert w * h > 2 * players - 1
+        assert len(players) <= 8
+        assert w * h > 2 * len(players) - 1
         self.snakes = {} # dictionary from player to Snake, e.g. {1: Snake, 2: Snake}
         self.foods = [] # list of food, e.g. [(1,2), (3, 4)]
         self.w = w
         self.h = h
-        self.numPlayers = players
-        self.numFoods = players - 1 # set the number of foods to be numPlayers - 1
+        self.numPlayers = len(players)
+        self.players = players
+        self.numFoods = self.numPlayers - 1 # set the number of foods to be numPlayers - 1
 
     def initializeBoard(self):
         self.initializeSnakes()
@@ -84,11 +84,11 @@ class Board:
                 board[r][c] = str(i)
         for (r, c) in self.foods:
             board[r][c] = "F"
-        print "Board"
+        print("Board")
         for i in range(0, len(board)):
-            print board[i]
+            print(board[i])
         #print board
-        print "============="
+        print("=============")
 
 
     def initializeFoods(self):
@@ -102,9 +102,9 @@ class Board:
         """
         Initialize all the snakes, give each of them a body of 1 CELL
         """
-        for i in range(1, self.numPlayers + 1):
+        for i in self.players:
             self.snakes[i] = Snake([], Direction.STAY) #
-        for i in range(1, self.numPlayers + 1):
+        for i in self.players:
             self.initializeSnake(i)
 
     def initializeSnake(self, player):
@@ -264,7 +264,6 @@ class Direction:
     LEFT = [0, -1] # go left, column decreases by 1
     RIGHT = [0, 1] # go right, column increases by 1
     STAY = [0, 0]
-    #OPPOSITE = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
 
     @staticmethod
     def isOppositeDirection(dir1, dir2):

@@ -1,7 +1,7 @@
 __author__ = 'TrevorTa'
 # Tests for snake_game.py
 #from django.test import TestCase
-from snake_game import *
+from providers.snake_game import *
 from unittest import TestCase
 
 class SnakeTestCase(TestCase):
@@ -93,7 +93,7 @@ class DirectionTestCase(TestCase):
 
 class BoardTestCase(TestCase):
     def testInitBoard(self):
-        board = Board(5, 5, 4)
+        board = Board(5, 5, [1,2,3,4])
         board.initializeBoard()
         self.assertEquals(board.w, 5)
         self.assertEquals(board.h, 5)
@@ -102,7 +102,7 @@ class BoardTestCase(TestCase):
         self.assertEquals(len(board.snakes), 4)
 
     def testAddFood(self):
-        board = Board(5, 5, 4)
+        board = Board(5, 5, [1,2,3,4])
         board.initializeFoods()
         self.assertEquals(len(board.foods), 3)
         board.addFood()
@@ -113,7 +113,7 @@ class BoardTestCase(TestCase):
         self.assertEquals(len(board.foods), 6)
 
     def testIsPointOutOfBound(self):
-        board = Board(5, 5, 4)
+        board = Board(5, 5, [1,2,3,4])
         self.assertFalse(board.isPointOutOfBound([1,2]))
         self.assertTrue(board.isPointOutOfBound([1,10]))
         self.assertTrue(board.isPointOutOfBound([10,10]))
@@ -122,7 +122,7 @@ class BoardTestCase(TestCase):
         self.assertTrue(board.isPointOutOfBound([5,5]))
 
     def testIsPointOnFood(self):
-        board = Board(5, 5, 4)
+        board = Board(5, 5, [1,2,3,4])
         board.foods = [[1,2],[2,3],[3,4]]
         self.assertTrue(board.isPointOnFood([1,2]))
         self.assertTrue(board.isPointOnFood([2,3]))
@@ -130,7 +130,7 @@ class BoardTestCase(TestCase):
         self.assertFalse(board.isPointOnFood([0,0]))
 
     def testIsPointOnSnake(self):
-        board = Board(5, 5, 4)
+        board = Board(5, 5, [1,2,3,4])
         board.snakes[1] = Snake([[1,1]], Direction.STAY)
         board.snakes[2] = Snake([[0,0]], Direction.LEFT)
         self.assertTrue(board.isPointOnSnake([1,1]))
@@ -139,7 +139,7 @@ class BoardTestCase(TestCase):
         self.assertFalse(board.isPointOnSnake([2,2]))
 
     def testMoveAllSnakes(self):
-        board = Board(5, 5, 4)
+        board = Board(5, 5, [1,2,3,4])
         board.snakes[1] = Snake([[1,1]], Direction.DOWN)
         board.snakes[2] = Snake([[0,0]], Direction.RIGHT)
         board.moveAllSnakes()
@@ -158,7 +158,7 @@ class BoardTestCase(TestCase):
         self.assertEquals(len(board.snakes), 0)
 
     def testMoveSnake(self):
-        board = Board(5, 5, 1)
+        board = Board(5, 5, [1,2,3,4])
         board.snakes[1] = Snake([[1,1], [0,1]], Direction.DOWN)
         board.moveSnake(1, [])
         self.assertEqual(board.snakes[1].body, [[2,1],[1,1]])
@@ -178,7 +178,7 @@ class BoardTestCase(TestCase):
         self.assertEqual(board.snakes[1].body, [[3,4]]) # can't change opposite direction, keep going and hit the wall
 
     def testRemoveSnake(self):
-        board = Board(5, 5, 6)
+        board = Board(5, 5, [1,2,3,4,5,6])
         board.initializeBoard()
         self.assertEquals(len(board.snakes), 6)
         board.removeSnake(2)
@@ -191,7 +191,7 @@ class BoardTestCase(TestCase):
         self.assertEquals(len(board.snakes), 3)
 
     def testMoveSnakeHitWall(self):
-        board = Board(5, 5, 1)
+        board = Board(5, 5, [1])
         board.snakes[1] = Snake([[0,0],[0,1], [0,2], [0,3]], Direction.LEFT)
         board.moveAllSnakes()
         self.assertEqual(board.snakes[1].body, [[0,0],[0,1],[0,2]])
@@ -203,7 +203,7 @@ class BoardTestCase(TestCase):
         self.assertTrue(len(board.snakes) == 0)
 
     def testMoveSnakeEatFood(self):
-        board = Board(5, 5, 1)
+        board = Board(5, 5, [1])
         board.snakes[1] = Snake([[0,0]], Direction.RIGHT)
         board.foods = [[0,1],[0,2],[0,3],[1,3]]
         board.moveAllSnakes()
@@ -219,7 +219,7 @@ class BoardTestCase(TestCase):
         self.assertEqual(len(board.foods), 4) # keep the same number of foods
 
     def testMoveSnakeAttackSimple(self):
-        board = Board(5, 5, 2)
+        board = Board(5, 5, [1,2])
         board.snakes[1] = Snake([[2,1],[2,0]], Direction.RIGHT)
         board.snakes[2] = Snake([[1,2],[2,2],[3,2],[4,2]], Direction.UP)
         board.moveAllSnakes()
@@ -227,7 +227,7 @@ class BoardTestCase(TestCase):
         self.assertEqual(board.snakes[2].body, [[0,2],[1,2],[2,2]])
 
     def testMoveSnakeAttackHeadToHeadBody(self):
-        board = Board(5, 5, 2)
+        board = Board(5, 5, [1,2])
         board.snakes[1] = Snake([[2,1],[2,0]], Direction.RIGHT)
         board.snakes[2] = Snake([[2,2],[3,2]], Direction.UP)
         board.moveAllSnakes()
@@ -235,7 +235,7 @@ class BoardTestCase(TestCase):
         self.assertEqual(board.snakes[2].body, [[1,2]])
 
     def testMoveSnakeAttackHeadToHead(self):
-        board = Board(5, 5, 2)
+        board = Board(5, 5, [1,2])
         board.snakes[1] = Snake([[0,0]], Direction.RIGHT)
         board.snakes[2] = Snake([[0,3],[0,4]], Direction.LEFT)
         board.moveAllSnakes()
