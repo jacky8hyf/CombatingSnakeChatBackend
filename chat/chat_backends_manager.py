@@ -29,7 +29,7 @@ class ChatBackendsManager(object):
                 self.backends[roomId] = None
 
     def publish_to_room(self, roomId, command, data = None):
-        if data:
+        if data is not None:
             msg = "{} {}".format(command, json.dumps(data))
         else:
             msg = command
