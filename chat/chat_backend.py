@@ -7,11 +7,10 @@ from combating_snake_settings import *
 class ChatBackend(object):
     """Interface for registering and updating WebSocket clients."""
 
-    def __init__(self, app, redis):
+    def __init__(self, logger, redis):
         self.clients = list()
         self.pubsub = redis.pubsub()
-        self.pubsub.subscribe(REDIS_CHAN)
-        self.logger = app.logger
+        self.logger = logger
 
     def __iter_data(self):
         for message in self.pubsub.listen():
@@ -19,6 +18,9 @@ class ChatBackend(object):
             if message['type'] == 'message':
                 self.logger.info(u'Sending message: {}'.format(data))
                 yield data
+
+    def subscribe(self, channel):
+        self.pubsub.subscribe(channel)
 
     def register(self, client):
         """Register a WebSocket connection for Redis updates."""
