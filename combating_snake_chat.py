@@ -16,7 +16,7 @@ import threading
 from flask import Flask, render_template
 from models.message import Message
 from providers.chat_backend import ChatBackend
-from providers.chat_backends_manager import ChatBackendsManager
+from providers.room_manager import RoomManager
 from providers.regex_sockets import RegexSockets
 from providers.rest_interface import RestInterface
 from providers.time_provider import TimeProvider
@@ -34,21 +34,37 @@ redis = redis_module.from_url(REDIS_URL)
 
 time = TimeProvider()
 
-cbmanager = ChatBackendsManager(app.logger, redis)
+roomManager = RoomManager(app.logger, redis)
 
 ### game loop
 def gameloop(roomId=None, *args, **kwargs):
-    
-    count = 100
-    while True:
-        # update game state
-        print("tick {}".format(count))
-        count -= 1 # FIXME: dumb game here
-        cbmanager.publish_to_room(roomId, 'ping', {'count':count})
-        if count <= 0:
-            break
+    # prepare the game
+    if not roomId:
+        app.logger.info('[GameLoop] No room id.')
+        return
+    room = RestInterface.get_room(roomId)
+    members = room.get('members')
+    creator = room.get('creator')
+    if not members or not creator:
+        app.logger.info('[GameLoop] no members or creator key')
+        return
+    members.append(creator)
+    memberIds = [member.get('userId') for member in members]
+    if len(memberIds) > MAX_MEMBERS_IN_ROOM:
+        roomManager.publish_to_room(roomId, error('Too many in the room, cannot start'))
+        return
+    board = roomManager.get(roomId).board = Board(BOARD_COLUMNS, BOARD_ROWS, memberIds)
 
+    # notify everybody: game starts here!
+    roomManager.publish_to_room(roomId, 'start')
+
+    # infinite game loop
+    while True: # FIXME actual game logic here
         time.sleep(.5) # sleep for .5 seconds
+        board.moveAllSnakes()
+        roomManager.publish_to_room(roomId, 'g', board.getGameState())
+        if board.gameEnds(): # FIXME game ends check
+            break;
 
 ### rooms route
 @sockets.route('/rooms/(\\d+)')
@@ -73,14 +89,14 @@ def rooms_route(ws, roomId):
     if (message.command == 'join' or message.command == 'reconn') and message.data:
         userId = authenticate(message.data)
         if not userId: return
-        cbmanager.listen_to_room(roomId, ws)
+        roomManager.listen_to_room(roomId, ws)
 
         if message.command == 'join':
             try:
                 data = RestInterface.join_and_get_room(roomId, userId)
             except Exception as ex:
                 ws.send(error(str(ex)))
-            cbmanager.publish_to_room(roomId, "room", data)
+            roomManager.publish_to_room(roomId, "room", data)
     else:
         ws.send(error('requires a join or reconn with authdata'))
         return # drop this connection
@@ -103,11 +119,15 @@ def rooms_route(ws, roomId):
             threading.Thread(target=gameloop,kwargs={"roomId": roomId}).start()
             continue
         if message.command in ('u','d','l','r'):
-            # FIXME sets appropriate game state
+            board = roomManager.get(roomId).board
+            if board:
+                board.changeDirection(userId, Direction.fromStr(message.command))
+            else:
+                ws.send(error('Game not started yet.'))
             continue
         if message.command == 'quit':
             data = RestInterface.exit_and_get_room(roomId, userId)
-            cbmanager.publish_to_room(roomId, "room", data)
+            roomManager.publish_to_room(roomId, "room", data)
             return # ends this connection
 
         ws.send(error('I don\' recognize this command {}'.format(message.command)))

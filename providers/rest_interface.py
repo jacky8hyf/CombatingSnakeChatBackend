@@ -1,10 +1,6 @@
 import requests
 from combating_snake_settings import *
 
-# this is the same constants for models.py in CombatingSnake REST API backend.
-STATUS_PLAYING = 1
-STATUS_WAITING = 0
-
 class RestInterface(object):
     @classmethod
     def authenticate_user(cls,userId, ts, auth):
@@ -35,6 +31,16 @@ class RestInterface(object):
         '''
         return cls.send_request('delete','/rooms/{}/members/{}'.format(roomId, userId),
             params={'return-room':True})
+
+    @classmethod
+    def get_room(cls, roomId):
+        '''
+        Get the room
+        '''
+        return cls.send_request('get','/rooms/{}'.format(roomId),
+            params={'members': True,
+                    'member-profile': True,
+                    'creator-profile': True})
 
     @staticmethod
     def start_room_if_created_by(roomId, userId):
