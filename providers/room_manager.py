@@ -2,41 +2,48 @@ from threading import Lock
 from .chat_backend import ChatBackend
 import json
 
-class ChatBackendsManager(object):
+class Room(object):
+    def __init__(self):
+        self.board = None
+        self.chatBackend = None
+
+class RoomManager(object):
     '''
-    A synchronized manager of ChatBackends. Each ChatBackend has a unique roomId
+    A synchronized manager of ChatRooms. Each ChatBackend has a unique roomId
     associated with it.
     '''
     def __init__(self, logger, redis):
-        self.backends = {}
+        self.rooms = {}
         self.logger = logger
         self.redis = redis
         self.lock = Lock()
 
     def get(self, roomId):
         with self.lock:
-            if roomId not in self.backends:
+            if roomId not in self.rooms:
                 cb = ChatBackend(self.logger, self.redis)
-                cb.subscribe(ChatBackendsManager.get_channel(roomId))
+                cb.subscribe(RoomManager.get_channel(roomId))
                 cb.start()
-                self.backends[roomId] = cb
-            return self.backends[roomId]
+                room = Room()
+                room.chatBackend = cb
+                self.rooms[roomId] = room
+            return self.rooms[roomId]
 
 
     def close(self, roomId):
         with self.lock:
-            if roomId in self.backends:
-                self.backends[roomId] = None
+            if roomId in self.rooms:
+                self.rooms[roomId] = None
 
     def publish_to_room(self, roomId, command, data = None):
         if data is not None:
             msg = "{} {}".format(command, json.dumps(data))
         else:
             msg = command
-        self.redis.publish(ChatBackendsManager.get_channel(roomId), msg)
+        self.redis.publish(RoomManager.get_channel(roomId), msg)
 
     def listen_to_room(self, roomId, ws):
-        self.get(roomId).register(ws)
+        self.get(roomId).chatBackend.register(ws)
 
     @staticmethod
     def get_channel(roomId):

@@ -6,7 +6,7 @@ project.
 1. `virtualenv venv`
 2. `source venv/bin/activate`
 3. `[sudo] pip install -r requirements.txt`
-4. `heroku config -s > .env`
+4. `heroku config -s --app combating-snake-chat-backend > .env`
 
 ## Run it!
 Simply run `heroku local` after you confirm there is the file `.env` in your
