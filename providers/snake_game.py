@@ -1,5 +1,6 @@
 __author__ = 'TrevorTa'
 
+from combating_snake_settings import *
 
 #TODO: NEED TO IMPLEMENT MAX LENGTH(HEALTH). CURRENTLY THE SNAKE CAN GROW TO ANY SIZE
 
@@ -45,13 +46,13 @@ class Board:
         """
         self.snakes[player].changeDirection(direction)
 
-    def gameEnds(self):
-        if len(self.snakes) > 1:
-            return None
-        # number of snakes is 0 or 1
-        for snakeID in self.snakes:
-            return snakeID # should return only 1 snake
-        return None # FIXME: NO ONE WINS?
+    # def gameEnds(self):
+    #     if len(self.snakes) > 1:
+    #         return None
+    #     # number of snakes is 0 or 1
+    #     for snakeID in self.snakes:
+    #         return snakeID # should return only 1 snake
+    #     return None # FIXME: NO ONE WINS?
 
     # ======================= IMPLEMENTATION ===================================
     def __init__(self, w, h, players):
@@ -61,7 +62,7 @@ class Board:
         :param h: height of the board
         :param players: list of player IDs
         """
-        assert len(players) <= 8
+        assert len(players) <= MAX_MEMBERS_IN_ROOM
         assert w * h > 2 * len(players) - 1
         self.snakes = {} # dictionary from player to Snake, e.g. {1: Snake, 2: Snake}
         self.foods = [] # list of food, e.g. [(1,2), (3, 4)]
