@@ -20,6 +20,7 @@ from providers.chat_backends_manager import ChatBackendsManager
 from providers.regex_sockets import RegexSockets
 from providers.rest_interface import RestInterface
 from providers.time_provider import TimeProvider
+from providers.snake_game import Board, Direction
 from combating_snake_settings import *
 
 ### globals
@@ -37,6 +38,7 @@ cbmanager = ChatBackendsManager(app.logger, redis)
 
 ### game loop
 def gameloop(roomId=None, *args, **kwargs):
+    
     count = 100
     while True:
         # update game state

@@ -10,3 +10,5 @@ if not MASTER_KEY:
 REST_HOST = os.environ.get('REST_HOST')
 if not REST_HOST:
     REST_HOST = "http://localhost:8080"
+    
+BOARD_SIZE = 24
