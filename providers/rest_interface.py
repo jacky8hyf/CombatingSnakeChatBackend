@@ -1,5 +1,5 @@
 import requests
-form combating_snake_settings import *
+from combating_snake_settings import *
 
 # this is the same constants for models.py in CombatingSnake REST API backend.
 STATUS_PLAYING = 1
@@ -44,7 +44,7 @@ class RestInterface(object):
         '''
         try:
             cls.send_request('put','/rooms/{}',
-                json={'status':STATUS_PLAYING},
+                json={'status':STATUS_PLAYING, 'proposer': userId},
                 expect_json_response=False)
         except:
             return False
