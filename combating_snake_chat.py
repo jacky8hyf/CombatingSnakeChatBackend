@@ -74,7 +74,10 @@ def rooms_route(ws, roomId):
         cbmanager.listen_to_room(roomId, ws)
 
         if message.command == 'join':
-            data = RestInterface.join_and_get_room(roomId, userId)
+            try:
+                data = RestInterface.join_and_get_room(roomId, userId)
+            except Exception as ex:
+                ws.send(error(str(ex)))
             cbmanager.publish_to_room(roomId, "room", data)
     else:
         ws.send(error('requires a join or reconn with authdata'))
