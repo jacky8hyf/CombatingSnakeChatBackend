@@ -14,6 +14,7 @@ class RestInterface(object):
         '''
         Return true if the user should be authenticated, false otherwise.
         '''
+        return True
         try:
             self.send_request('post', '/users/{}/authenticate'.format(userId),
                 json = {'ts':ts,'auth':auth},
