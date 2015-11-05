@@ -14,12 +14,12 @@ import gevent
 import json
 import threading
 from flask import Flask, render_template
-from chat.chat_backend import ChatBackend
-from chat.chat_backends_manager import ChatBackendsManager
-from chat.regex_sockets import RegexSockets
+from models.message import Message
+from providers.chat_backend import ChatBackend
+from providers.chat_backends_manager import ChatBackendsManager
+from providers.regex_sockets import RegexSockets
 from providers.rest_interface import RestInterface
 from providers.time_provider import TimeProvider
-from chat.message import Message
 from combating_snake_settings import *
 
 ### globals
@@ -32,47 +32,6 @@ sockets = RegexSockets(app)
 redis = redis_module.from_url(REDIS_URL)
 
 time = TimeProvider()
-
-## original chat demo code. placed here for reference; need to be deleted later
-
-chats = ChatBackend(app.logger, redis)
-chats.subscribe(REDIS_CHAN)
-chats.start()
-
-@app.route('/')
-def hello():
-    return render_template('index.html')
-
-@sockets.route('/submit')
-def inbox(ws):
-    """Receives incoming chat messages, inserts them into Redis."""
-    while True:
-        # Sleep to prevent *contstant* context-switches.
-        gevent.sleep(0.1)
-        message = ws.receive()
-
-        if message:
-            app.logger.info(u'Inserting message: {}'.format(message))
-            redis.publish(REDIS_CHAN, message)
-
-@sockets.route('/receive')
-def outbox(ws):
-    """Sends outgoing chat messages, via `ChatBackend`."""
-    chats.register(ws)
-
-    while True:
-        # Context switch while `ChatBackend.start` is running in the background.
-        gevent.sleep()
-
-@sockets.route('/echo')
-def echo_socket(ws):
-    while True:
-        message = ws.receive()
-        ws.send(message)
-
-####################################################
-#            Combating snake logic                 #
-####################################################
 
 cbmanager = ChatBackendsManager(app.logger, redis)
 
@@ -123,7 +82,14 @@ def rooms_route(ws, roomId):
 
     # infinite loop to handle the rest of the messages
     while True:
-        message = Message.from_str(ws.receive())
+        message = None
+        try:
+            message = Message.from_str(ws.receive())
+        except:
+            return # end this connection
+
+        if message is None:
+            continue
 
         if message.command == 'start':
             if not RestInterface.start_room_if_created_by(roomId, userId):

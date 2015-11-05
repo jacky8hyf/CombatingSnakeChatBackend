@@ -72,7 +72,7 @@ class Board:
         snake logics, include eating food, attacking opponent, check bounds
         :param player: player's ID, get the snake from the snakes dictionary
         """
-        
+
         self.snakes[player].move()
 
     def addFood(self):
@@ -131,4 +131,5 @@ class Snake:
         newHead = Direction.newPoint(head, self.direction)
         self.body.insert(0, newHead) # append the new head to the beginning of the body
 
-Board(20, 20, 4)
+if __name__ == '__main__':
+    Board(20, 20, 4)
