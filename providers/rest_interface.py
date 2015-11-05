@@ -24,7 +24,8 @@ class RestInterface(object):
         Put user in the room and return the new room data (a dictionary).
         Raise an exception if the user fails to do so.
         '''
-        return cls.send_request('post','/rooms/{}/members/{}'.format(roomId, userId))
+        return cls.send_request('put','/rooms/{}/members/{}'.format(roomId, userId),
+            params={'return-room':True})
 
     @classmethod
     def exit_and_get_room(cls, roomId, userId):
@@ -32,7 +33,8 @@ class RestInterface(object):
         Kick user out of the room and return the new room data (a dictionary).
         Raise an exception if the user fails to do so.
         '''
-        return cls.send_request('delete','/rooms/{}/members/{}'.format(roomId, userId))
+        return cls.send_request('delete','/rooms/{}/members/{}'.format(roomId, userId),
+            params={'return-room':True})
 
     @staticmethod
     def start_room_if_created_by(roomId, userId):
