@@ -23,7 +23,7 @@ class Board:
         for snakeID in self.snakes: # select each snakeID
             snake = self.snakes[snakeID]
             res[snakeID] = snake.body # {1: [[1,2], [1,3]]}
-        res["foods"] = self.foods
+        res["_food"] = self.foods
         return res
 
     def moveAllSnakes(self):
@@ -44,6 +44,14 @@ class Board:
         :param direction: Direction.UP/DOWN/LEFT/RIGHT (do not allow STAY)
         """
         self.snakes[player].changeDirection(direction)
+
+    def gameEnds(self):
+        if len(self.snakes) > 1:
+            return None
+        # number of snakes is 0 or 1
+        for snakeID in self.snakes:
+            return snakeID # should return only 1 snake
+        return None # FIXME: NO ONE WINS?
 
     # ======================= IMPLEMENTATION ===================================
     def __init__(self, w, h, players):
@@ -264,6 +272,22 @@ class Direction:
     LEFT = [0, -1] # go left, column decreases by 1
     RIGHT = [0, 1] # go right, column increases by 1
     STAY = [0, 0]
+
+    @staticmethod
+    def from_str(s):
+        """
+        Translate from string 'l','r','u','d' to Direction.
+        :param s: string representation of direction
+        """
+        if (s == 'l'):
+            return Direction.LEFT
+        if (s == 'r'):
+            return Direction.RIGHT
+        if (s == 'u'):
+            return Direction.UP
+        if (s == 'd'):
+            return Direction.DOWN
+        return None
 
     @staticmethod
     def isOppositeDirection(dir1, dir2):
