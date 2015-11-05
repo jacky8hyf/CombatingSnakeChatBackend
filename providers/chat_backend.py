@@ -1,10 +1,10 @@
+# This code is copied from https://devcenter.heroku.com/articles/python-websockets
+
 import os
 import logging
 import gevent
 from flask import Flask, render_template
 from combating_snake_settings import *
-
-
 
 class ChatBackend(object):
     """Interface for registering and updating WebSocket clients."""
@@ -14,7 +14,7 @@ class ChatBackend(object):
         '''
         Create a new ChatBackend object (could be a mock depending on the context)
         '''
-        return cls(*args) # FIXME MOCK IT
+        return cls(*args)
 
     def __init__(self, logger, redis):
         self.clients = list()

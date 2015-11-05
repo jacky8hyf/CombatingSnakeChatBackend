@@ -8,6 +8,14 @@ class Room(object):
         self.chatBackend = None
 
 class RoomManager(object):
+
+    @classmethod
+    def create(cls, *args):
+        '''
+        Create a RoomManager object. (Could be a mock)
+        '''
+        return cls(*args)
+
     '''
     A synchronized manager of ChatRooms. Each ChatBackend has a unique roomId
     associated with it.
