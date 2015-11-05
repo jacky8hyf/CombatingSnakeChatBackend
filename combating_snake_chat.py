@@ -15,7 +15,6 @@ import json
 import threading
 from flask import Flask, render_template
 from models.message import Message
-from providers.chat_backend import ChatBackend
 from providers.room_manager import RoomManager
 from providers.regex_sockets import RegexSockets
 from providers.rest_interface import RestInterface
@@ -32,9 +31,11 @@ sockets = RegexSockets(app)
 
 redis = redis_module.from_url(REDIS_URL)
 
-time = TimeProvider()
+time = TimeProvider.create()
 
 roomManager = RoomManager(app.logger, redis)
+
+restInterface = RestInterface.create()
 
 ### game loop
 def gameloop(roomId=None, *args, **kwargs):
@@ -42,7 +43,7 @@ def gameloop(roomId=None, *args, **kwargs):
     if not roomId:
         app.logger.info('[GameLoop] No room id.')
         return
-    room = RestInterface.get_room(roomId)
+    room = restInterface.get_room(roomId)
     members = room.get('members')
     creator = room.get('creator')
     if not members or not creator:
@@ -84,7 +85,7 @@ def rooms_route(ws, roomId):
         if 'userId' not in authdata or 'ts' not in authdata or 'auth' not in authdata:
             ws.send(error("missing keys"))
             return None
-        if RestInterface.authenticate_user(authdata['userId'], authdata['ts'], authdata['auth']):
+        if restInterface.authenticate_user(authdata['userId'], authdata['ts'], authdata['auth']):
             return authdata['userId']
         ws.send(error('cannnot authenticate'))
         return None
@@ -101,7 +102,7 @@ def rooms_route(ws, roomId):
 
         if message.command == 'join':
             try:
-                data = RestInterface.join_and_get_room(roomId, userId)
+                data = restInterface.join_and_get_room(roomId, userId)
             except Exception as ex:
                 ws.send(error(str(ex)))
             roomManager.publish_to_room(roomId, "room", data)
@@ -121,7 +122,7 @@ def rooms_route(ws, roomId):
             continue
 
         if message.command == 'start':
-            if not RestInterface.start_room_if_created_by(roomId, userId):
+            if not restInterface.start_room_if_created_by(roomId, userId):
                 ws.send(error('You don\'t have permission to start the game'))
                 continue
             threading.Thread(target=gameloop,kwargs={"roomId": roomId}).start()
@@ -134,7 +135,7 @@ def rooms_route(ws, roomId):
                 ws.send(error('Game not started yet.'))
             continue
         if message.command == 'quit':
-            data = RestInterface.exit_and_get_room(roomId, userId)
+            data = restInterface.exit_and_get_room(roomId, userId)
             roomManager.publish_to_room(roomId, "room", data)
             return # ends this connection
 

@@ -4,8 +4,17 @@ import gevent
 from flask import Flask, render_template
 from combating_snake_settings import *
 
+
+
 class ChatBackend(object):
     """Interface for registering and updating WebSocket clients."""
+
+    @classmethod
+    def create(cls, *args):
+        '''
+        Create a new ChatBackend object (could be a mock depending on the context)
+        '''
+        return cls(*args) # FIXME MOCK IT
 
     def __init__(self, logger, redis):
         self.clients = list()
@@ -43,3 +52,5 @@ class ChatBackend(object):
     def start(self):
         """Maintains Redis subscription in the background."""
         gevent.spawn(self.run)
+
+

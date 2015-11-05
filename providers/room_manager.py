@@ -21,7 +21,7 @@ class RoomManager(object):
     def get(self, roomId):
         with self.lock:
             if roomId not in self.rooms:
-                cb = ChatBackend(self.logger, self.redis)
+                cb = ChatBackend.create(self.logger, self.redis)
                 cb.subscribe(RoomManager.get_channel(roomId))
                 cb.start()
                 room = Room()

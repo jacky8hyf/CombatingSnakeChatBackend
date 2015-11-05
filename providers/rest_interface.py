@@ -2,61 +2,63 @@ import requests
 from combating_snake_settings import *
 
 class RestInterface(object):
+
     @classmethod
-    def authenticate_user(cls,userId, ts, auth):
+    def create(cls, *args):
+        '''
+        Create a RestInterface object. (Could be a mock)
+        '''
+        return cls(*args)
+
+    def authenticate_user(self, userId, ts, auth):
         '''
         Return true if the user should be authenticated, false otherwise.
         '''
         try:
-            cls.send_request('post', '/users/{}/authenticate'.format(userId),
+            self.send_request('post', '/users/{}/authenticate'.format(userId),
                 json = {'ts':ts,'auth':auth},
                 expect_json_response = False)
         except:
             return False
 
-    @classmethod
-    def join_and_get_room(roomId, userId):
+    def join_and_get_room(self, roomId, userId):
         '''
         Put user in the room and return the new room data (a dictionary).
         Raise an exception if the user fails to do so.
         '''
-        return cls.send_request('put','/rooms/{}/members/{}'.format(roomId, userId),
+        return self.send_request('put','/rooms/{}/members/{}'.format(roomId, userId),
             params={'return-room':True})
 
-    @classmethod
-    def exit_and_get_room(cls, roomId, userId):
+    def exit_and_get_room(self, roomId, userId):
         '''
         Kick user out of the room and return the new room data (a dictionary).
         Raise an exception if the user fails to do so.
         '''
-        return cls.send_request('delete','/rooms/{}/members/{}'.format(roomId, userId),
+        return self.send_request('delete','/rooms/{}/members/{}'.format(roomId, userId),
             params={'return-room':True})
 
-    @classmethod
-    def get_room(cls, roomId):
+    def get_room(self, roomId):
         '''
         Get the room
         '''
-        return cls.send_request('get','/rooms/{}'.format(roomId),
+        return self.send_request('get','/rooms/{}'.format(roomId),
             params={'members': True,
                     'member-profile': True,
                     'creator-profile': True})
 
-    @staticmethod
-    def start_room_if_created_by(roomId, userId):
+    def start_room_if_created_by(self, roomId, userId):
         '''
         Start the game in the room and return true iff room exists and is
         created by user. Return false otherwise.
         '''
         try:
-            cls.send_request('put','/rooms/{}',
+            self.send_request('put','/rooms/{}',
                 json={'status':STATUS_PLAYING, 'proposer': userId},
                 expect_json_response=False)
         except:
             return False
 
-    @classmethod
-    def send_request(cls, method, path,
+    def send_request(self, method, path,
         expect_json_response=True, **kwargs):
         '''
         helper method for sending requests. return kv pair of response.
