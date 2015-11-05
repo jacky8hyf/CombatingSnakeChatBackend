@@ -12,8 +12,8 @@ class RestInterface(object):
         Return true if the user should be authenticated, false otherwise.
         '''
         try:
-            cls.send_request('get', '/users/{}/authenticate'.format(userId),
-                params = {'ts':ts,'auth':auth},
+            cls.send_request('post', '/users/{}/authenticate'.format(userId),
+                json = {'ts':ts,'auth':auth},
                 expect_json_response = False)
         except:
             return False
@@ -42,7 +42,7 @@ class RestInterface(object):
         '''
         try:
             cls.send_request('put','/rooms/{}',
-                data={'status':STATUS_PLAYING},
+                json={'status':STATUS_PLAYING},
                 expect_json_response=False)
         except:
             return False
