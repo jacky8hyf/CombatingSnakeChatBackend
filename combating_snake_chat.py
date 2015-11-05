@@ -49,6 +49,8 @@ def gameloop(roomId=None, *args, **kwargs):
         app.logger.info('[GameLoop] no members or creator key')
         return
     members.append(creator)
+    membersDict = {}
+    for member in members: membersDict[member['userId']] = member;
     memberIds = [member.get('userId') for member in members]
     if len(memberIds) > MAX_MEMBERS_IN_ROOM:
         roomManager.publish_to_room(roomId, error('Too many in the room, cannot start'))
@@ -59,11 +61,17 @@ def gameloop(roomId=None, *args, **kwargs):
     roomManager.publish_to_room(roomId, 'start')
 
     # infinite game loop
-    while True: # FIXME actual game logic here
-        time.sleep(.5) # sleep for .5 seconds
+    while True:
+        time.sleep(GAME_TICK_TIME)
         board.moveAllSnakes()
         roomManager.publish_to_room(roomId, 'g', board.getGameState())
-        if board.gameEnds(): # FIXME game ends check
+        snakes = board.snakes
+        if len(snakes) <= 1:
+            winner = snakes[0] if len(snakes) == 1 else None
+            winner = membersDict.get(winner) if winner else None
+            roomManager.publish_to_room(roomId, 'end', {
+                'winner': winner
+                } if winner else None)
             break;
 
 ### rooms route
