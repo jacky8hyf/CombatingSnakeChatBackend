@@ -27,4 +27,4 @@ class SnakeGameExecutionTest(BaseTestCase):
 
     def testGameLoop(self):
         random.seed(1)
-        self.snakeGameExecution.start(self.roomId)
+        self.snakeGameExecution.start(self.roomId) # FIXME this is not a real test, just for experiment
