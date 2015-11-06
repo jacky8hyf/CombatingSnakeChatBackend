@@ -15,6 +15,7 @@ class RestInterface(object):
         '''
         Return true if the user should be authenticated, false otherwise.
         '''
+        return True # FIXME bypassing authentication
         try:
             self.send_request('post', '/users/{}/authenticate'.format(userId),
                 json = {'ts':ts,'auth':auth},
