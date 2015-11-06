@@ -109,7 +109,7 @@ def handleOtherMessage(message, roomId, userId):
     if message.command == 'start':
         if not restInterface.start_room_if_created_by(roomId, userId):
             raise InvalidInputError('You don\'t have permission to start the game')
-        threading.Thread(target=snakeGameExecution.gameloop,kwargs={"roomId": roomId}).start()
+        threading.Thread(target=snakeGameExecution.start,kwargs={"roomId": roomId}).start()
         return False
     if message.command in ('u','d','l','r'):
         board = roomManager.get(roomId).board

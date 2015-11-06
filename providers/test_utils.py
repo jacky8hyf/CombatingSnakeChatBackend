@@ -1,12 +1,29 @@
 from unittest import TestCase
 import unittest
+import random
 from mock import Mock
 from .chat_backend import ChatBackend
 from .room_manager import RoomManager
 from .time_provider import TimeProvider
+from .rest_interface import RestInterface
 
 class BaseTestCase(TestCase):
-    pass
+    '''
+    Test of rest_interface.py.
+    It will connect to http://localhost:8080 as defined
+    in combating_snake_settings.py. So set up the django server
+    running on that port before running this test.
+    '''
+    def createUser(self, restInterface):
+        userResponse = restInterface.send_request('post', '/users', json = {"username":
+            "test_user_" + str(random.getrandbits(64)),
+            "password":"password"})
+        return userResponse['userId'], userResponse['sessionId']
+
+    def createRoom(self, restInterface, sessionId):
+        roomResponse = restInterface.send_request('post', '/rooms',
+            headers={'X-Snake-Session-Id':sessionId})
+        return roomResponse['roomId']
 
 
 class MockChatBackend(object):
@@ -22,9 +39,20 @@ class MockTimeProvider(TimeProvider):
 
 class MockLogger(object):
     @classmethod
-    def create(cls, *args, **kwargs): return Mock()
+    def create(cls, *args, **kwargs): return cls(*args, **kwargs)
+    def info(self, msg):
+        print(msg)
 
 class MockRedis(object):
     @classmethod
-    def create(cls, *args, **kwargs): return Mock(spec = cls)
-    def publish(self, chan, msg): pass
+    def create(cls, *args, **kwargs): return Mock(wrap = MockRedis())
+    def publish(self, chan, msg):
+        print("[REDIS] {}: {}".format(chan, msg))
+
+# class MockRoomManager(RoomManager):
+#     @classmethod
+#     def create(cls, *args, **kwargs): return Mock(spec = RoomManager)
+
+# class MockRestInterface(RestInterface):
+#     @classmethod
+#     def create(cls, *args, **kwargs): return Mock(spec = RestInterface)
