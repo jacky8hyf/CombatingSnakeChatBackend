@@ -52,8 +52,7 @@ snakeGameExecution = SnakeGameExecution.create(
 def rooms_route(ws, roomId):
     try:
         message = retrieveNextMessage(ws)
-        userId = handleFirstMessage(message, roomId)
-        roomManager.listen_to_room(roomId, ws)
+        userId = handleFirstMessage(message, roomId, ws)
     except InvalidInputError as ex:
         ws.send(ex.json())
         return # end this connection if cannot authenticate
@@ -79,7 +78,7 @@ def retrieveNextMessage(ws):
         message = Message.from_str(ws.receive())
     return message
 
-def handleFirstMessage(message, roomId):
+def handleFirstMessage(message, roomId, ws):
     '''
     Handles the first message. Returns userId if authentication is successful.
     '''
@@ -93,12 +92,25 @@ def handleFirstMessage(message, roomId):
     if not restInterface.authenticate_user(authdata['userId'], authdata['ts'], authdata['auth']):
         raise InvalidInputError('cannnot authenticate')
     userId = authdata['userId']
-    if message.command == 'join':
+    room = None
+    if message.command == 'reconn':
         try:
-            data = restInterface.join_and_get_room(roomId, userId)
-            roomManager.publish_to_room(roomId, "room", data)
+            room = restInterface.get_room(roomId)
+        except Exception as ex:
+            raise InvalidInputError(str(ex))
+        if room.get('creator')['userId'] == userId or \
+            userId in [e['userId'] for e in room.get('members')]:
+            roomManager.listen_to_room(roomId, ws)
+            ws.send('room {}'.format(json.dumps(room)))
+        else:
+            raise InvalidInputError('You are not in the room {}'.format(roomId))
+    elif message.command == 'join':
+        try:
+            room = restInterface.join_and_get_room(roomId, userId)
         except Exception as ex: # the user cannot join the room
             raise InvalidInputError(str(ex))
+        roomManager.listen_to_room(roomId, ws)
+        roomManager.publish_to_room(roomId, "room", room)
     return userId
 
 def handleOtherMessage(message, roomId, userId):
