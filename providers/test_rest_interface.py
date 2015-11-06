@@ -13,27 +13,14 @@ from .rest_interface import RestInterface
 print("RestInterfaceTestCase: Testing against {}".format(REST_HOST))
 
 class RestInterfaceTestCase(BaseTestCase):
-    '''
-    Test of rest_interface.py.
-    It will connect to http://localhost:8080 as defined
-    in combating_snake_settings.py. So set up the django server
-    running on that port before running this test.
-    '''
-    def createUser(self):
-        userResponse = self.restInterface.send_request('post', '/users', json = {"username":
-            "test_user_" + str(random.getrandbits(64)),
-            "password":"password"})
-        return userResponse['userId'], userResponse['sessionId']
 
     def setUp(self):
         self.restInterface = RestInterface.create()
 
-        self.userId, self.sessionId = self.createUser()
-        self.bobId, self.bobSession = self.createUser()
+        self.userId, self.sessionId = self.createUser(self.restInterface)
+        self.bobId, self.bobSession = self.createUser(self.restInterface)
 
-        roomResponse = self.restInterface.send_request('post', '/rooms',
-            headers={'X-Snake-Session-Id':self.sessionId})
-        self.roomId = roomResponse['roomId']
+        self.roomId = self.createRoom(self.restInterface, self.sessionId)
 
     def tearDown(self):
         self.restInterface.send_request('delete', '/users/' + self.userId);
