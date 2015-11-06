@@ -2,7 +2,8 @@
 from time import time
 from hashlib import sha256
 import random
-from kgb import spy_on
+import requests
+import mock
 
 from combating_snake_settings import *
 from .test_utils import *
@@ -20,7 +21,7 @@ class RestInterfaceTestCase(BaseTestCase):
     '''
     def createUser(self):
         userResponse = self.restInterface.send_request('post', '/users', json = {"username":
-            "test_user_" + str(random.randint(1,10000)),
+            "test_user_" + str(random.getrandbits(64)),
             "password":"password"})
         return userResponse['userId'], userResponse['sessionId']
 
@@ -58,9 +59,8 @@ class RestInterfaceTestCase(BaseTestCase):
         self.assertEquals(STATUS_PLAYING, self.restInterface.get_room(self.roomId)['status'])
 
     def testNoMasterKey(self):
-        with spy_on(self.restInterface.send_request, call_fake =
-            lambda interface, *args, **kwargs:
-                self.fake_send_request(*args, **kwargs)):
+        restInterface = Mock(wraps = self.restInterface)
+        with mock.patch.object(self.restInterface, 'send_request', self.fake_send_request):
             ts = int(time() * 1000)
             rawAuth = "{}:{}:{}".format(self.sessionId, self.userId, ts)
             auth = sha256(rawAuth).hexdigest();

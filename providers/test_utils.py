@@ -1,29 +1,30 @@
 from unittest import TestCase
 import unittest
-from chat_backend import ChatBackend
-from room_manager import RoomManager
-from kgb import SpyAgency, spy_on
+from mock import Mock
+from .chat_backend import ChatBackend
+from .room_manager import RoomManager
+from .time_provider import TimeProvider
 
 class BaseTestCase(TestCase):
-    def assertMethodCalledWith(self, func, *args, **kwargs):
-        self.assertTrue(func.called_with(*args, **kwargs),
-            "{} is not called with ({}, {})".format(func, args, kwargs))
-    def assertFunctionCalledWith(self, func, *args, **kwargs):
-        self.assertTrue(func.spy.called_with(*args, **kwargs),
-            "{} is not called with ({}, {})".format(func, args, kwargs))
+    pass
 
 
-class MockChatBackend(ChatBackend):
+class MockChatBackend(object):
     @classmethod
-    def create(cls, *args):
-        return cls(*args)
-    def __init__(self, logger, redis): pass
-    def __iter_data(self): pass
-    def subscribe(self, channel): pass
-    def register(self, client): pass
-    def send(self, client, data): pass
-    def run(self):pass
-    def start(self):pass
+    def create(cls, *args, **kwargs): return Mock(spec = ChatBackend)
+
+class MockTimeProvider(TimeProvider):
+    @classmethod
+    def create(cls, *args, **kwargs): return cls(*args, **kwargs)
+    def __init__(self, *args, **kwargs): self._time = 0
+    def time(self): return self._time
+    def sleep(self, secs): self._time+=secs
+
+class MockLogger(object):
+    @classmethod
+    def create(cls, *args, **kwargs): return Mock()
 
 class MockRedis(object):
+    @classmethod
+    def create(cls, *args, **kwargs): return Mock(spec = cls)
     def publish(self, chan, msg): pass
