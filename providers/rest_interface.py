@@ -1,3 +1,4 @@
+import traceback
 import requests
 from combating_snake_settings import *
 
@@ -14,11 +15,11 @@ class RestInterface(object):
         '''
         Return true if the user should be authenticated, false otherwise.
         '''
-        return True
         try:
             self.send_request('post', '/users/{}/authenticate'.format(userId),
                 json = {'ts':ts,'auth':auth},
                 expect_json_response = False)
+            return True
         except:
             return False
 
@@ -53,7 +54,7 @@ class RestInterface(object):
         created by user. Return false otherwise.
         '''
         try:
-            self.send_request('put','/rooms/{}',
+            self.send_request('put','/rooms/{}'.format(roomId),
                 json={'status':STATUS_PLAYING, 'proposer': userId},
                 expect_json_response=False)
         except:
@@ -70,12 +71,13 @@ class RestInterface(object):
             kwargs['headers'] = {}
         kwargs['headers']['X-Snake-Master-Key'] = MASTER_KEY
         try:
-            response = getattr(requests, method)(
+            response = getattr(requests, method.lower())(
                 REST_HOST + path,
                 **kwargs)
             response.raise_for_status()
             if expect_json_response:
                 return response.json()
         except:
-            raise Exception("server returns {} {}".format(response.status_code if response else None,
-                response.content if response else None))
+            # traceback.print_exc();
+            raise Exception("server returns {} {}".format(response.status_code if response is not None else None,
+                response.content if response is not None else None))

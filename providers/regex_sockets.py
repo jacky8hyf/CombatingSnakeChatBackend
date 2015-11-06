@@ -7,6 +7,9 @@ class RegexSocketMiddleware(object):
         self.app = wsgi_app
 
     def __call__(self, environ, start_response):
+        if 'wsgi.websocket' not in environ:
+            return self.app(environ, start_response) # this is not a websocket request from the client
+
         path = environ['PATH_INFO']
 
         for pattern, handler in self.ws.url_map.items():

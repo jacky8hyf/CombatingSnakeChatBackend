@@ -76,7 +76,7 @@ def gameloop(roomId=None, *args, **kwargs):
             break;
 
 ### rooms route
-@sockets.route('/rooms/(\\d+)')
+@sockets.route('/rooms/(\\w+)')
 def rooms_route(ws, roomId):
 
     error = lambda message: 'error {}'.format(json.dumps({"msg": message}))
@@ -103,9 +103,10 @@ def rooms_route(ws, roomId):
         if message.command == 'join':
             try:
                 data = restInterface.join_and_get_room(roomId, userId)
+                roomManager.publish_to_room(roomId, "room", data)
             except Exception as ex:
                 ws.send(error(str(ex)))
-            roomManager.publish_to_room(roomId, "room", data)
+                return
     else:
         ws.send(error('requires a join or reconn with authdata'))
         return # drop this connection
