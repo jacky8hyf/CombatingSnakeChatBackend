@@ -1,10 +1,10 @@
 __author__ = 'TrevorTa'
 # Tests for snake_game.py
 #from django.test import TestCase
-from providers.snake_game import *
+from .snake_game_models import *
 from unittest import TestCase
 
-class SnakeTestCase(TestCase):
+class SnakeGameModelsTestCase(TestCase):
     def testSnakeInit(self):
         snake = Snake([[1,1]], Direction.UP)
         self.assertTrue(snake.direction == Direction.UP)

@@ -15,12 +15,14 @@ import json
 import threading
 from flask import Flask, render_template
 from models.message import Message
+from models.invalid_input_error import InvalidInputError
 from providers.room_manager import RoomManager
 from providers.regex_sockets import RegexSockets
 from providers.rest_interface import RestInterface
 from providers.time_provider import TimeProvider
-from providers.snake_game import Board, Direction
-from combating_snake_settings import *
+from models.snake_game_models import Board, Direction
+from providers.snake_game_execution import SnakeGameExecution
+from combating_snake_settings import DEBUG, REDIS_URL
 
 ### globals
 
@@ -31,114 +33,92 @@ sockets = RegexSockets(app)
 
 redis = redis_module.from_url(REDIS_URL)
 
-time = TimeProvider.create()
+timeProvider = TimeProvider.create()
 
-roomManager = RoomManager(app.logger, redis)
+roomManager = RoomManager.create(
+    logger = app.logger,
+    redis = redis)
 
 restInterface = RestInterface.create()
 
-### game loop
-def gameloop(roomId=None, *args, **kwargs):
-    # prepare the game
-    if not roomId:
-        app.logger.info('[GameLoop] No room id.')
-        return
-    room = restInterface.get_room(roomId)
-    members = room.get('members')
-    creator = room.get('creator')
-    if not members or not creator:
-        app.logger.info('[GameLoop] no members or creator key')
-        return
-    members.append(creator)
-    membersDict = {}
-    for member in members: membersDict[member['userId']] = member;
-    memberIds = [member.get('userId') for member in members]
-    if len(memberIds) > MAX_MEMBERS_IN_ROOM:
-        roomManager.publish_to_room(roomId, error('Too many in the room, cannot start'))
-        return
-    board = roomManager.get(roomId).board = Board(BOARD_COLUMNS, BOARD_ROWS, memberIds)
-
-    # notify everybody: game starts here!
-    roomManager.publish_to_room(roomId, 'start')
-
-    # infinite game loop
-    while True:
-        time.sleep(GAME_TICK_TIME)
-        board.moveAllSnakes()
-        roomManager.publish_to_room(roomId, 'g', board.getGameState())
-        snakes = board.snakes
-        if len(snakes) <= 1:
-            winner = snakes[0] if len(snakes) == 1 else None
-            winner = membersDict.get(winner) if winner else None
-            roomManager.publish_to_room(roomId, 'end', {
-                'winner': winner
-                } if winner else None)
-            break;
+snakeGameExecution = SnakeGameExecution.create(
+    restInterface = restInterface,
+    roomManager = roomManager,
+    timeProvider = timeProvider,
+    logger = app.logger)
 
 ### rooms route
 @sockets.route('/rooms/(\\w+)')
 def rooms_route(ws, roomId):
-
-    error = lambda message: 'error {}'.format(json.dumps({"msg": message}))
-
-    def authenticate(authdata):
-        if 'userId' not in authdata or 'ts' not in authdata or 'auth' not in authdata:
-            ws.send(error("missing keys"))
-            return None
-        if restInterface.authenticate_user(authdata['userId'], authdata['ts'], authdata['auth']):
-            return authdata['userId']
-        ws.send(error('cannnot authenticate'))
-        return None
-
-    message = Message.from_str(ws.receive())
-    if not message:
-        return
-
-    # consume the first message; require it to be join or reconn
-    if (message.command == 'join' or message.command == 'reconn') and message.data:
-        userId = authenticate(message.data)
-        if not userId: return
+    try:
+        message = retrieveNextMessage(ws)
+        userId = handleFirstMessage(message, roomId)
         roomManager.listen_to_room(roomId, ws)
-
-        if message.command == 'join':
-            try:
-                data = restInterface.join_and_get_room(roomId, userId)
-                roomManager.publish_to_room(roomId, "room", data)
-            except Exception as ex:
-                ws.send(error(str(ex)))
-                return
-    else:
-        ws.send(error('requires a join or reconn with authdata'))
-        return # drop this connection
+    except InvalidInputError as ex:
+        ws.send(ex.json())
+        return # end this connection if cannot authenticate
 
     # infinite loop to handle the rest of the messages
     while True:
-        message = None
+        message = retrieveNextMessage(ws)
         try:
-            message = Message.from_str(ws.receive())
-        except:
-            return # end this connection
-
-        if message is None:
+            if handleOtherMessage(message, roomId, userId):
+                break
+        except InvalidInputError as ex:
+            ws.send(ex.json())
             continue
 
-        if message.command == 'start':
-            if not restInterface.start_room_if_created_by(roomId, userId):
-                ws.send(error('You don\'t have permission to start the game'))
-                continue
-            threading.Thread(target=gameloop,kwargs={"roomId": roomId}).start()
-            continue
-        if message.command in ('u','d','l','r'):
-            board = roomManager.get(roomId).board
-            if board:
-                board.changeDirection(userId, Direction.fromStr(message.command))
-            else:
-                ws.send(error('Game not started yet.'))
-            continue
-        if message.command == 'quit':
-            data = restInterface.exit_and_get_room(roomId, userId)
+### helper methods
+
+def retrieveNextMessage(ws):
+    '''
+    Retrieve next non-trivial message. Raise an exception if socket ends
+    '''
+    message = None
+    while not message:
+        message = Message.from_str(ws.receive())
+    return message
+
+def handleFirstMessage(message, roomId):
+    '''
+    Handles the first message. Returns userId if authentication is successful.
+    '''
+    # consume the first message; require it to be join or reconn
+    if (message.command != 'join' and message.command != 'reconn') or not message.data:
+        raise InvalidInputError('requires a join or reconn with authdata')
+
+    authdata = message.data
+    if 'userId' not in authdata or 'ts' not in authdata or 'auth' not in authdata:
+        raise InvalidInputError("missing keys")
+    if not restInterface.authenticate_user(authdata['userId'], authdata['ts'], authdata['auth']):
+        raise InvalidInputError('cannnot authenticate')
+    userId = authdata['userId']
+    if message.command == 'join':
+        try:
+            data = restInterface.join_and_get_room(roomId, userId)
             roomManager.publish_to_room(roomId, "room", data)
-            return # ends this connection
+        except Exception as ex: # the user cannot join the room
+            raise InvalidInputError(str(ex))
+    return userId
 
-        ws.send(error('I don\' recognize this command {}'.format(message.command)))
-
+def handleOtherMessage(message, roomId, userId):
+    '''
+    Handles the rest of the messages. Assume game starts.
+    Raise an exception if any error. Return True if the connection should end.
+    '''
+    if message.command == 'start':
+        if not restInterface.start_room_if_created_by(roomId, userId):
+            raise InvalidInputError('You don\'t have permission to start the game')
+        threading.Thread(target=snakeGameExecution.gameloop,kwargs={"roomId": roomId}).start()
+        return False
+    if message.command in ('u','d','l','r'):
+        board = roomManager.get(roomId).board
+        if not board:
+            raise InvalidInputError('Game not started yet.')
+        board.changeDirection(userId, Direction.fromStr(message.command))
+        return False
+    if message.command == 'quit':
+        data = restInterface.exit_and_get_room(roomId, userId)
+        roomManager.publish_to_room(roomId, "room", data)
+        return True
+    raise InvalidInputError('I don\' recognize this command {}'.format(message.command))

@@ -10,17 +10,17 @@ class Room(object):
 class RoomManager(object):
 
     @classmethod
-    def create(cls, *args):
+    def create(cls, *args, **kwargs):
         '''
         Create a RoomManager object. (Could be a mock)
         '''
-        return cls(*args)
+        return cls(*args, **kwargs)
 
     '''
     A synchronized manager of ChatRooms. Each ChatBackend has a unique roomId
     associated with it.
     '''
-    def __init__(self, logger, redis):
+    def __init__(self, logger, redis, *args, **kwargs):
         self.rooms = {}
         self.logger = logger
         self.redis = redis

@@ -5,11 +5,11 @@ from combating_snake_settings import *
 class RestInterface(object):
 
     @classmethod
-    def create(cls, *args):
+    def create(cls, *args, **kwargs):
         '''
         Create a RestInterface object. (Could be a mock)
         '''
-        return cls(*args)
+        return cls(*args, **kwargs)
 
     def authenticate_user(self, userId, ts, auth):
         '''
