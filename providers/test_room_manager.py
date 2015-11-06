@@ -9,8 +9,7 @@ from .room_manager import RoomManager
 
 class RoomManagerTestCase(BaseTestCase, unittest.TestCase):
     def setUp(self):
-        #self.agency = SpyAgency()
-        #self.agency.spy_on(ChatBackend.create, call_fake = lambda cls, *args, **kwargs:MockChatBackend.create(*args, **kwargs))
+        # manually spy the create method of ChatBackend module.
         self.chatBackEndMgr = \
             patch.object(ChatBackend, 'create', MockChatBackend.create)
         self.chatBackEndMgr.__enter__()

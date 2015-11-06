@@ -1,6 +1,7 @@
 import json
 from combating_snake_settings import MAX_MEMBERS_IN_ROOM, GAME_TICK_TIME, BOARD_COLUMNS, BOARD_ROWS
 from models.snake_game_models import Board
+from models.invalid_input_error import InvalidInputError
 
 class SnakeGameExecution(object):
 
@@ -20,7 +21,7 @@ class SnakeGameExecution(object):
     ### game loop
     def gameloop(self, roomId=None, *args, **kwargs):
 
-        error = lambda message: 'error {}'.format(json.dumps({"msg": message}))
+        error = lambda message: InvalidInputError(message).json()
 
         # prepare the game
         if not roomId:
