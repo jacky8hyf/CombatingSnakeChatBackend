@@ -30,7 +30,7 @@ class SnakeGameExecution(object):
         room = self.restInterface.get_room(roomId)
         members = room.get('members')
         creator = room.get('creator')
-        if not members or not creator:
+        if members is None or creator is None:
             self.logger.info('[GameLoop] no members or creator key')
             return None, None
         members.append(creator)
@@ -61,15 +61,19 @@ class SnakeGameExecution(object):
         Prepare the game, notify everybody that the game starts, and
         Run the game loop until end.
         '''
+        self.logger.info('[GameLoop] starting...')
         board, membersDict = self.prepare(roomId)
         if not board or not membersDict:
+            self.logger.info('[GameLoop] prepare failed!')
             return
 
         # notify everybody: game starts here!
         self.roomManager.publish_to_room(roomId, 'start')
 
+        self.logger.info('[GameLoop] looping...')
         # infinite game loop
         while True:
+            self.logger.info('[GameLoop] tick')
             self.timeProvider.sleep(GAME_TICK_TIME)
             snakes = self.tickOnce(roomId, board, membersDict)
             if snakes is not None: # could be an empty list

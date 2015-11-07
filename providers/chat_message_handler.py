@@ -1,6 +1,7 @@
 import json
 import traceback
 import threading
+import time
 from models.snake_game_models import Direction
 from models.invalid_input_error import InvalidInputError
 
