@@ -20,6 +20,7 @@ class Message(object):
                 except ValueError:
                     pass
                 break
+        return msg
 
     @classmethod
     def create(cls, command = None, data = None):
