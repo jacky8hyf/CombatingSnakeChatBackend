@@ -84,8 +84,13 @@ class ChatMessageHandlerTestCase(BaseTestCase):
         self.chatMessageHandler.handleOtherMessage(Message.create('start'), self.roomId, self.roomOwner[0])
 
         # owner quits the game
-        self.chatMessageHandler.handleOtherMessage(Message.create('start'), self.roomId, self.roomOwner[0])
+        self.chatMessageHandler.handleOtherMessage(Message.create('quit'), self.roomId, self.roomOwner[0])
+        self.assertNotEquals(self.roomOwner[0], self.restInterface.get_room(self.roomId)['creator']['userId'])
 
+        self.chatMessageHandler.handleOtherMessage(Message.create('quit'), self.roomId, userId)
+        with self.assertRaises(Exception) as cm:
+            self.restInterface.get_room(self.roomId)
+        self.assertIn('Not Found Room', str(cm.exception))
 
     def constructAuth(self, command, userId, sessionId):
         ts = int(time.time() * 1000)
