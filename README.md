@@ -21,6 +21,7 @@ project.
 ## Test it
 Many of the tests are highly dependent on the [Django app](/jacky8hyf/CS169CombatingSnake);
 so you need to have that app running on a different process.
+
 1. Clone the [Django app](/jacky8hyf/CS169CombatingSnake)
 2. In the root of that app, run: `[PORT=8080] heroku local`; you need to specify
    the port manually if it is not 8080 by default. If you don't want it to run on
