@@ -83,4 +83,6 @@ def retrieveNextMessage(ws):
     message = None
     while not message:
         message = Message.from_str(ws.receive())
+        if not message:
+            ws.send("error " + InvalidInputError("Invalid format.").json())
     return message
