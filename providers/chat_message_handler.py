@@ -5,7 +5,7 @@ from models.snake_game_models import Direction
 from models.invalid_input_error import InvalidInputError
 
 class ChatMessageHandler(object):
-    
+
     @classmethod
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
@@ -68,6 +68,7 @@ class ChatMessageHandler(object):
             return False
         if message.command == 'quit':
             data = self.restInterface.exit_and_get_room(roomId, userId)
+                # could be empty if room is deleted
             self.roomManager.publish_to_room(roomId, "room", data)
             return True
         raise InvalidInputError('I don\' recognize this command {}'.format(message.command))

@@ -3,9 +3,9 @@ from .test_utils import *
 from combating_snake_settings import *
 from .snake_game_execution import SnakeGameExecution
 
-print("RestInterfaceTestCase: Testing against {}".format(REST_HOST))
+print("SnakeGameExecutionTestCase: Testing against {}".format(REST_HOST))
 
-class SnakeGameExecutionTest(BaseTestCase):
+class SnakeGameExecutionTestCase(BaseTestCase):
     def setUp(self):
         self.timeProvider = MockTimeProvider.create()
         self.logger = MockLogger.create()

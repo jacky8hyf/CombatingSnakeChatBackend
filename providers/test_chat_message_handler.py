@@ -15,6 +15,7 @@ class ChatMessageHandlerTestCase(BaseTestCase):
         self.redis = Mock(wraps = redis_module.from_url(REDIS_URL))
         self.logger = MockLogger.create()
         self.roomManager = Mock(wraps = RoomManager.create(logger = self.logger, redis = self.redis))
+        self.deleteAllUsers(self.restInterface)
         self.users = [self.createUser(self.restInterface) for _ in range(MAX_MEMBERS_IN_ROOM)]
             # tuple of (userId, sessionId)
         self.roomOwner = self.users[0]
@@ -66,20 +67,25 @@ class ChatMessageHandlerTestCase(BaseTestCase):
             self.roomManager.publish_to_room.assert_not_called()
             self.restInterface.join_and_get_room.assert_not_called()
 
-            # TODO Test on rejoining has no effect
-            # TODO Test on full room
+            # TODO Test on non-member joining a full room -> error
+            # TODO Test on member joining a full room -> no effect
 
-    def testHandleOtherMessages(self):
+    def testHandleStartQuit(self):
         ws = MockWebsocket.create()
         userId, sessionId = self.users[1]
         msg = self.constructAuth('join', userId, sessionId)
         self.chatMessageHandler.handleFirstMessage(msg, self.roomId, ws)
 
-        with self.assertRaises(InvalidInputError) as cm:
+        with self.assertRaises(InvalidInputError) as cm: # member cannot start the game
             self.chatMessageHandler.handleOtherMessage(Message.create('start'), self.roomId, userId)
         self.assertIn('permission', cm.exception.json())
 
+        # owner should be able to start the game
         self.chatMessageHandler.handleOtherMessage(Message.create('start'), self.roomId, self.roomOwner[0])
+
+        # owner quits the game
+        self.chatMessageHandler.handleOtherMessage(Message.create('start'), self.roomId, self.roomOwner[0])
+
 
     def constructAuth(self, command, userId, sessionId):
         ts = int(time.time() * 1000)

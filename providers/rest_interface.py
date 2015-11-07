@@ -62,6 +62,14 @@ class RestInterface(object):
         except:
             return False
 
+    def ends_game(self, roomId):
+        '''
+        Ends the game
+        '''
+        self.send_request('put','/rooms/{}'.format(roomId),
+                json={'status':STATUS_WAITING},
+                expect_json_response=False)
+
     def send_request(self, method, path,
         expect_json_response=True, **kwargs):
         '''

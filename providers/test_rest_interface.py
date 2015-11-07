@@ -17,6 +17,8 @@ class RestInterfaceTestCase(BaseTestCase):
     def setUp(self):
         self.restInterface = RestInterface.create()
 
+        self.deleteAllUsers(self.restInterface)
+
         self.userId, self.sessionId = self.createUser(self.restInterface)
         self.bobId, self.bobSession = self.createUser(self.restInterface)
 
@@ -44,6 +46,12 @@ class RestInterfaceTestCase(BaseTestCase):
         self.assertEquals(STATUS_WAITING, self.restInterface.get_room(self.roomId)['status'])
         self.restInterface.start_room_if_created_by(self.roomId, self.userId)
         self.assertEquals(STATUS_PLAYING, self.restInterface.get_room(self.roomId)['status'])
+
+    def testEndsRoom(self):
+        self.restInterface.start_room_if_created_by(self.roomId, self.userId)
+        self.assertEquals(STATUS_PLAYING, self.restInterface.get_room(self.roomId)['status'])
+        self.restInterface.ends_game(self.roomId)
+        self.assertEquals(STATUS_WAITING, self.restInterface.get_room(self.roomId)['status'])
 
     def testNoMasterKey(self):
         restInterface = Mock(wraps = self.restInterface)

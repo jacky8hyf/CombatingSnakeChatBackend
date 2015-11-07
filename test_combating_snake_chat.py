@@ -8,7 +8,7 @@ from models.message import Message
 import combating_snake_chat
 
 class ChatTestCase(BaseTestCase):
-    pass
+    pass # TODO write test for combating_snake_chat.py
 
 
 

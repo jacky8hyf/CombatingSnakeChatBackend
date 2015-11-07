@@ -78,4 +78,5 @@ class SnakeGameExecution(object):
                 self.roomManager.publish_to_room(roomId, 'end', {
                     'winner': winner
                     } if winner else None)
+                self.restInterface.ends_game(roomId)
                 return snakes

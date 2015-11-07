@@ -21,6 +21,9 @@ class BaseTestCase(TestCase):
             "password":"password"})
         return userResponse['userId'], userResponse['sessionId']
 
+    def deleteAllUsers(self, restInterface):
+        restInterface.send_request('delete', '/users')
+
     def createRoom(self, restInterface, sessionId):
         roomResponse = restInterface.send_request('post', '/rooms',
             headers={'X-Snake-Session-Id':sessionId})
