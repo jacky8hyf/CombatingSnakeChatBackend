@@ -33,7 +33,7 @@ so you need to have that app running on a different process.
    checks for iteration 2.
 
 Below is the original README for the Python Websockets example. The original repository
-is [here](/heroku-examples/python-websockets-chat)
+is [here](/heroku-examples/python-websockets-chat).
 
 # Python Websockets Example: Chat
 
