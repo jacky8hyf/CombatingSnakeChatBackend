@@ -64,6 +64,7 @@ class Board:
         """
         assert len(players) <= MAX_MEMBERS_IN_ROOM
         assert w * h > 2 * len(players) - 1
+        print("[LOGIC] board is initialized to size {} x {}".format(h, w))
         self.snakes = {} # dictionary from player to Snake, e.g. {1: Snake, 2: Snake}
         self.foods = [] # list of food, e.g. [(1,2), (3, 4)]
         self.w = w
@@ -146,6 +147,8 @@ class Board:
         :param player: player's ID, get the snake from the snakes dictionary
         """
         snake = self.snakes[player] # get the current snake
+        if snake.direction == Direction.STAY:
+            return
         head = snake.body[0]
         newHead = Direction.newPoint(head, snake.direction) # get the position of the new head of the snake
         # check if the snake hits the wall
@@ -154,6 +157,7 @@ class Board:
             if snake.length() == 0:
                 #self.removeSnake(player)
                 snakesToRemove.append(player)
+                print('[LOGIC] killing {} : out of bounds : {}'.format(player, newHead))
             return
         overlappedSnake = self.isPointOnSnake(newHead) # id of the overlapped snake
         if overlappedSnake == 0: # no snake at this new point
@@ -169,9 +173,11 @@ class Board:
                 snake.removeTail()
                 if snake.length() == 0:
                     snakesToRemove.append(player)
+                    print('[LOGIC] killing {} : length is zero from headon collision'.format(player))
                 otherSnake.removeTail()
                 if otherSnake.length() == 0:
                     snakesToRemove.append(overlappedSnake)
+                    print('[LOGIC] killing {} : length is zero from headon collision'.format(player))
             else: # attack body of the other snake, the other snake got hurt
                 otherSnake.removeTail()
                 snake.move()
@@ -202,9 +208,9 @@ class Board:
 
     def generateRandomPoint(self):
         import random
-        x = random.randint(0, self.w - 1)
-        y = random.randint(0, self.h - 1)
-        return [x, y]
+        c = random.randint(0, self.w - 1)
+        r = random.randint(0, self.h - 1)
+        return [r, c]
 
 class Snake:
     def __init__(self, bodies, direction):

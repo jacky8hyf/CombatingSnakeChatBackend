@@ -23,6 +23,7 @@ class SnakeGameExecution(object):
         return InvalidInputError(message).json()
 
     def prepare(self, roomId):
+        self.logger.info('[GameLoop] preparing...')
         # prepare the game
         if not roomId:
             self.logger.info('[GameLoop] No room id.')
@@ -47,13 +48,16 @@ class SnakeGameExecution(object):
 
     def tickOnce(self, roomId, board, membersDict):
         '''
-        Return True if the loop should be broken, False if the loop should continue
+        Return a list of snakeIds if the loop should be broken, None if the loop should continue
         '''
+        self.logger.info('[GameLoop] tick')
         board.moveAllSnakes()
-        self.roomManager.publish_to_room(roomId, 'g', board.getGameState())
+        state = board.getGameState()
+        self.logger.info('[GameLoop] {}'.format(state))
+        self.roomManager.publish_to_room(roomId, 'g', state)
         snakes = board.snakes
         if len(snakes) <= 1:
-            return snakes
+            return snakes.keys()
         return None
 
     def start(self, roomId=None, *args, **kwargs):
@@ -73,10 +77,9 @@ class SnakeGameExecution(object):
         self.logger.info('[GameLoop] looping...')
         # infinite game loop
         while True:
-            self.logger.info('[GameLoop] tick')
             self.timeProvider.sleep(GAME_TICK_TIME)
             snakes = self.tickOnce(roomId, board, membersDict)
-            if snakes is not None: # could be an empty list
+            if snakes is not None: # could be an empty dict
                 winner = snakes[0] if len(snakes) == 1 else None
                 winner = membersDict.get(winner) if winner else None
                 self.roomManager.publish_to_room(roomId, 'end', {
