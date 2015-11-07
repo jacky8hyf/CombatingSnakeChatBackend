@@ -3,20 +3,24 @@ import traceback
 class Message(object):
     commands = ['join', 'reconn', 'quit', 'start', 'u','l','d','r']
 
-    def __init__(self, message_str):
-        self.command = None
-        self.data = None
+    def __init__(self, command = None, data = None):
+        self.command = command
+        self.data = data
+
+    @classmethod
+    def from_str(cls, message_str):
+        if message_str is None:
+            return None
+        msg = cls()
         for command in Message.commands:
             if message_str.startswith(command):
-                self.command = command
+                msg.command = command
                 try:
-                    self.data = json.loads(message_str[len(command):].strip())
+                    msg.data = json.loads(message_str[len(command):].strip())
                 except ValueError:
                     pass
                 break
 
     @classmethod
-    def from_str(cls, msgstr):
-        if msgstr is None:
-            return None
-        return cls(msgstr)
+    def create(cls, command = None, data = None):
+        return cls(command, data)

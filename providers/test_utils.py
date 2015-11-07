@@ -2,6 +2,7 @@ from unittest import TestCase
 import unittest
 import random
 from mock import Mock
+from geventwebsocket.websocket import WebSocket
 from .chat_backend import ChatBackend
 from .room_manager import RoomManager
 from .time_provider import TimeProvider
@@ -56,3 +57,7 @@ class MockRedis(object):
 # class MockRestInterface(RestInterface):
 #     @classmethod
 #     def create(cls, *args, **kwargs): return Mock(spec = RestInterface)
+
+class MockWebsocket(object):
+    @classmethod
+    def create(cls, *args, **kwargs): return Mock(spec = WebSocket)

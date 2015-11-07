@@ -58,6 +58,7 @@ class RestInterface(object):
             self.send_request('put','/rooms/{}'.format(roomId),
                 json={'status':STATUS_PLAYING, 'proposer': userId},
                 expect_json_response=False)
+            return True
         except:
             return False
 
