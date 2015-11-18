@@ -1,8 +1,8 @@
 import os
+import json
 REDIS_URL = os.environ.get('REDISCLOUD_URL')
 if not REDIS_URL:
     REDIS_URL = "redis://localhost"
-# REDIS_CHAN = 'chat'
 DEBUG = 'DEBUG' in os.environ
 MASTER_KEY = os.environ.get('MASTER_KEY')
 if not MASTER_KEY:
@@ -10,6 +10,12 @@ if not MASTER_KEY:
 REST_HOST = os.environ.get('REST_HOST')
 if not REST_HOST:
     REST_HOST = "http://localhost:8080"
+
+BYPASS_AUTHENTICATION = os.environ.get('BYPASS_AUTHENTICATION')
+if BYPASS_AUTHENTICATION:
+    BYPASS_AUTHENTICATION = json.loads(BYPASS_AUTHENTICATION) # cast it to True, False, 0 or 1
+else:
+    BYPASS_AUTHENTICATION = True # TODO default to true; set to False to allow authentication of users
 
 BOARD_ROWS = 21
 BOARD_COLUMNS = 38

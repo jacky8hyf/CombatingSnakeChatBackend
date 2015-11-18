@@ -15,10 +15,9 @@ class Board:
         Return the game state to client. Game state includes positions of the snakes
         and positions of foods.
         :return: Example:
-        {1:[[5,9], [5,10]],
-        2: [[10,11], [11, 11], [12,11]],
-        4: [[3, 2], [3, 3]],
-        "foods":[[10,13], [32, 2]]}
+        {"ea9":[[5,9], [5,10]],
+         "ca8": [[10,11], [11, 11], [12,11]],
+        "_food":[[10,13], [32, 2]]}
         """
         res = {}
         for snakeID in self.snakes: # select each snakeID
