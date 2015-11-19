@@ -20,16 +20,17 @@ class RoomManager(object):
     A synchronized manager of ChatRooms. Each ChatBackend has a unique roomId
     associated with it.
     '''
-    def __init__(self, logger, redis, *args, **kwargs):
+    def __init__(self, logger, redis, chatBackendProvider = ChatBackend, *args, **kwargs):
         self.rooms = {}
         self.logger = logger
         self.redis = redis
+        self.chatBackendProvider = chatBackendProvider
         self.lock = Lock()
 
     def get(self, roomId):
         with self.lock:
             if roomId not in self.rooms:
-                cb = ChatBackend.create(self.logger, self.redis)
+                cb = self.chatBackendProvider.create(self.logger, self.redis)
                 cb.subscribe(RoomManager.get_channel(roomId))
                 cb.start()
                 room = Room()

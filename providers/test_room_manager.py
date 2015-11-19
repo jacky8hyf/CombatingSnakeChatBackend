@@ -9,14 +9,10 @@ from .room_manager import RoomManager
 
 class RoomManagerTestCase(BaseTestCase, unittest.TestCase):
     def setUp(self):
-        # manually spy the create method of ChatBackend module.
-        self.chatBackEndMgr = \
-            patch.object(ChatBackend, 'create', MockChatBackend.create)
-        self.chatBackEndMgr.__enter__()
         self.redis = MockRedis.create()
-        self.roomManager = RoomManager.create(None, self.redis)
+        self.roomManager = RoomManager.create(MockLogger.create(), self.redis, chatBackendProvider = MockChatBackend)
     def tearDown(self):
-        self.chatBackEndMgr.__exit__()
+        pass
 
     def testSanity(self):
         self.assertIsInstance(self.roomManager.get('meow').chatBackend, Mock)

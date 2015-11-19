@@ -12,7 +12,7 @@ from models.message import Message
 class ChatMessageHandlerTestCase(BaseTestCase):
     def setUp(self):
         self.restInterface = Mock(wraps = RestInterface.create())
-        self.redis = Mock(wraps = redis_module.from_url(REDIS_URL))
+        self.redis = MockRedis.create()
         self.logger = MockLogger.create()
         self.roomManager = Mock(wraps = RoomManager.create(logger = self.logger, redis = self.redis))
         self.deleteAllUsers(self.restInterface)
