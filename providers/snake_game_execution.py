@@ -65,6 +65,7 @@ class SnakeGameExecution(object):
         Prepare the game, notify everybody that the game starts, and
         Run the game loop until end.
         '''
+        ### TODO needs to be code reviewed ###
         self.logger.info('[GameLoop] starting...')
         board, membersDict = self.prepare(roomId)
         if not board or not membersDict:

@@ -249,5 +249,11 @@ class BoardTestCase(TestCase):
     def testMaxLength(self):
         pass
 
-
-
+    def testGameEnd(self):
+        board = Board(5, 5, [3,3])
+        board.snakes[1] = Snake([[1,1]], Direction.LEFT)
+        board.snakes[2] = Snake([[2,2]], Direction.LEFT)
+        board.moveAllSnakes()
+        self.assertEquals(len(board.snakes), 2)
+        board.moveAllSnakes()
+        self.assertEquals(len(board.snakes), 1)

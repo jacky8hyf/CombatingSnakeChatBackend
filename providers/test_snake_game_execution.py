@@ -43,9 +43,12 @@ class SnakeGameExecutionTestCase(BaseTestCase):
             self.timeProvider.sleep(.5)
             snakes = self.snakeGameExecution.tickOnce(self.roomId, board, membersDict)
             if snakes is not None:
+                self.assertLessEqual(len(self.roomManager.get(self.roomId).board.snakes), 1)
                 winner = snakes[0] if snakes else None
                 print winner
                 break
+            else:
+                self.assertGreater(len(self.roomManager.get(self.roomId).board.snakes), 1)
 
 
 
