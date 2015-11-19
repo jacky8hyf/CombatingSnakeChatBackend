@@ -25,5 +25,6 @@ class RoomManagerTestCase(BaseTestCase, unittest.TestCase):
 
     def testListenToRoom(self):
         room = self.roomManager.get('meow')
-        self.roomManager.listen_to_room('meow', "fake_ws")
-        room.chatBackend.register.assert_called_with("fake_ws")
+        ws = MockWebsocket.create()
+        self.roomManager.listen_to_room('meow', ws)
+        room.chatBackend.register.assert_called_with(ws)
