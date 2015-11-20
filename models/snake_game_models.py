@@ -239,7 +239,7 @@ class Snake:
         """
         Change direction of this snake. Check that the snake is not turning around.
         """
-        if not Direction.isOppositeDirection(self.direction, newDirection):
+        if self.body.len == 1 or not Direction.isOppositeDirection(self.direction, newDirection): # when the snake's len is 1, any new direction is permitted
             self.direction = newDirection
 
     def move(self):
