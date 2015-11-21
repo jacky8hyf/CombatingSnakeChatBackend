@@ -149,12 +149,13 @@ class Board:
         if snake.direction == Direction.STAY:
             return
         head = snake.body[0]
+        snake.moving = True # XXX: USE THIS AS A LOCK IN DIRECTION
         newHead = Direction.newPoint(head, snake.direction) # get the position of the new head of the snake
+        snake.moving = False
         # check if the snake hits the wall
         if self.isPointOutOfBound(newHead):
             snake.removeTail() # if the snake hits the wall, remove its tail
             if snake.length() == 0:
-                #self.removeSnake(player)
                 snakesToRemove.append(player)
                 print('[LOGIC] killing {} : out of bounds : {}'.format(player, newHead))
             return
@@ -222,6 +223,7 @@ class Snake:
         self.verifyBody(bodies)
         self.body = bodies
         self.direction = direction
+        self.moving = False # TRUE IF THE SNAKE IS MOVING
 
     def length(self):
         return len(self.body)
@@ -239,7 +241,7 @@ class Snake:
         """
         Change direction of this snake. Check that the snake is not turning around.
         """
-        if self.length() == 1 or not Direction.isOppositeDirection(self.direction, newDirection): # when the snake's len is 1, any new direction is permitted
+        if not self.moving and (self.length() == 1 or not Direction.isOppositeDirection(self.direction, newDirection)): # when the snake's len is 1, any new direction is permitted
             self.direction = newDirection
 
     def move(self):
