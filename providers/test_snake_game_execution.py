@@ -37,15 +37,15 @@ class SnakeGameExecutionTestCase(BaseTestCase):
 
         board, membersDict = self.snakeGameExecution.prepare(self.roomId)
         for userId, sessionId in self.users:
-            self.roomManager.get(self.roomId).board.changeDirection(userId, Direction.UP)
+            self.roomManager.get(self.roomId).board.onKeyStroke(userId, Direction.UP)
         while True:
-            print(self.roomManager.get(self.roomId).board.getGameState())
+            # print(self.roomManager.get(self.roomId).board.getGameState())
             self.timeProvider.sleep(.5)
             snakes = self.snakeGameExecution.tickOnce(self.roomId, board, membersDict)
             if snakes is not None:
                 self.assertLessEqual(len(self.roomManager.get(self.roomId).board.snakes), 1)
                 winner = snakes[0] if snakes else None
-                print winner
+                # print winner
                 break
             else:
                 self.assertGreater(len(self.roomManager.get(self.roomId).board.snakes), 1)

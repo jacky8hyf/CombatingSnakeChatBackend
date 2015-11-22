@@ -65,7 +65,7 @@ class ChatMessageHandler(object):
             board = self.roomManager.get(roomId).board
             if not board:
                 raise InvalidInputError('Game not started yet.')
-            board.changeDirection(userId, Direction.from_str(message.command))
+            board.onKeyStroke(userId, Direction.from_str(message.command))
             return False
         if message.command == 'quit':
             data = self.restInterface.exit_and_get_room(roomId, userId)

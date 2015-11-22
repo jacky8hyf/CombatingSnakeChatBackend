@@ -40,14 +40,14 @@ class Board:
             for i in snakesToRemove: # remove all the snakes that have length 0
                 self.removeSnake(i)
 
-    def changeDirection(self, player, direction):
+    def onKeyStroke(self, player, direction):
         """
         Mimics the behavior when a player hits a keystroke
         :param player: playerID (1 to numPlayers)
         :param direction: Direction.UP/DOWN/LEFT/RIGHT (do not allow STAY)
         """
         with self.lock:
-            self.snakes[player].changeDirection(direction)
+            self.snakes[player].onKeyStroke(direction)
 
     # def gameEnds(self):
     #     if len(self.snakes) > 1:
@@ -151,9 +151,9 @@ class Board:
         :param player: player's ID, get the snake from the snakes dictionary
         """
         snake = self.snakes[player] # get the current snake
+        snake.applyLastKeyStroke()
         if snake.direction == Direction.STAY:
             return
-        snake.applyLastKeyStroke()
         head = snake.body[0]
         newHead = Direction.newPoint(head, snake.direction) # get the position of the new head of the snake
         # check if the snake hits the wall
@@ -247,7 +247,7 @@ class Snake:
         if self.length() == 1 or not Direction.isOppositeDirection(self.direction, self.lastKeyStroke):
             self.direction = self.lastKeyStroke
 
-    def changeDirection(self, keyStroke):
+    def onKeyStroke(self, keyStroke):
         """
         Change direction of this snake. Check that the snake is not turning around.
         """
