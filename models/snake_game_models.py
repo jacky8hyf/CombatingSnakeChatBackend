@@ -1,5 +1,6 @@
 __author__ = 'TrevorTa'
 
+import threading
 from combating_snake_settings import *
 
 #TODO: NEED TO IMPLEMENT MAX LENGTH(HEALTH). CURRENTLY THE SNAKE CAN GROW TO ANY SIZE
@@ -19,23 +20,25 @@ class Board:
          "ca8": [[10,11], [11, 11], [12,11]],
         "_food":[[10,13], [32, 2]]}
         """
-        res = {}
-        for snakeID in self.snakes: # select each snakeID
-            snake = self.snakes[snakeID]
-            res[snakeID] = snake.body # {1: [[1,2], [1,3]]}
-        res["_food"] = self.foods
-        return res
+        with self.lock:
+            res = {}
+            for snakeID in self.snakes: # select each snakeID
+                snake = self.snakes[snakeID]
+                res[snakeID] = snake.body # {1: [[1,2], [1,3]]}
+            res["_food"] = self.foods
+            return res
 
     def moveAllSnakes(self):
         """
         Move all snakes on the board according to each snake's current direction.
         Called at each time tick.
         """
-        snakesToRemove = []
-        for i in self.snakes: # select each snakeID
-            self.moveSnake(i, snakesToRemove)
-        for i in snakesToRemove: # remove all the snakes that have length 0
-            self.removeSnake(i)
+        with self.lock:
+            snakesToRemove = []
+            for i in self.snakes: # select each snakeID
+                self.moveSnake(i, snakesToRemove)
+            for i in snakesToRemove: # remove all the snakes that have length 0
+                self.removeSnake(i)
 
     def changeDirection(self, player, direction):
         """
@@ -43,7 +46,8 @@ class Board:
         :param player: playerID (1 to numPlayers)
         :param direction: Direction.UP/DOWN/LEFT/RIGHT (do not allow STAY)
         """
-        self.snakes[player].changeDirection(direction)
+        with self.lock:
+            self.snakes[player].changeDirection(direction)
 
     # def gameEnds(self):
     #     if len(self.snakes) > 1:
@@ -63,7 +67,7 @@ class Board:
         """
         assert len(players) <= MAX_MEMBERS_IN_ROOM
         assert w * h > 2 * len(players) - 1
-        print("[LOGIC] board is initialized to size {} x {}".format(h, w))
+        # print("[LOGIC] board is initialized to size {} x {}".format(h, w))
         self.snakes = {} # dictionary from player to Snake, e.g. {1: Snake, 2: Snake}
         self.foods = [] # list of food, e.g. [(1,2), (3, 4)]
         self.w = w
@@ -71,6 +75,7 @@ class Board:
         self.numPlayers = len(players)
         self.players = players
         self.numFoods = self.numPlayers - 1 # set the number of foods to be numPlayers - 1
+        self.lock = threading.Lock()
 
     def initializeBoard(self):
         self.initializeSnakes()
@@ -155,7 +160,7 @@ class Board:
             snake.removeTail() # if the snake hits the wall, remove its tail
             if snake.length() == 0:
                 snakesToRemove.append(player)
-                print('[LOGIC] killing {} : out of bounds : {}'.format(player, newHead))
+                # print('[LOGIC] killing {} : out of bounds : {}'.format(player, newHead))
             return
         overlappedSnake = self.isPointOnSnake(newHead) # id of the overlapped snake
         if overlappedSnake == 0: # no snake at this new point
@@ -171,11 +176,11 @@ class Board:
                 snake.removeTail()
                 if snake.length() == 0:
                     snakesToRemove.append(player)
-                    print('[LOGIC] killing {} : length is zero from headon collision'.format(player))
+                    # print('[LOGIC] killing {} : length is zero from headon collision'.format(player))
                 otherSnake.removeTail()
                 if otherSnake.length() == 0:
                     snakesToRemove.append(overlappedSnake)
-                    print('[LOGIC] killing {} : length is zero from headon collision'.format(player))
+                    # print('[LOGIC] killing {} : length is zero from headon collision'.format(player))
             else: # attack body of the other snake, the other snake got hurt
                 otherSnake.removeTail()
                 snake.move()
