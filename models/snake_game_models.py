@@ -154,7 +154,6 @@ class Board:
         if self.isPointOutOfBound(newHead):
             snake.removeTail() # if the snake hits the wall, remove its tail
             if snake.length() == 0:
-                #self.removeSnake(player)
                 snakesToRemove.append(player)
                 print('[LOGIC] killing {} : out of bounds : {}'.format(player, newHead))
             return
