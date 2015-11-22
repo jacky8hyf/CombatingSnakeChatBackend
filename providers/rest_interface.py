@@ -71,6 +71,21 @@ class RestInterface(object):
                 json={'status':STATUS_WAITING},
                 expect_json_response=False)
 
+    def update_scores(self, players, winner = None):
+        '''
+        Update scores for players and winner. Return true if successful, false
+        otherwise.
+        '''
+        obj = {'players':players}
+        if winner: obj['winner'] = winner;
+        try:
+            self.send_request('put','/users/scores',
+                json = obj,
+                expect_json_response=False)
+            return True
+        except:
+            return False
+
     def send_request(self, method, path,
         expect_json_response=True, **kwargs):
         '''

@@ -23,16 +23,16 @@ class SnakeGameExecution(object):
         return InvalidInputError(message).json()
 
     def prepare(self, roomId):
-        self.logger.info('[GameLoop] preparing...')
+        # self.logger.info('[GameLoop] preparing...')
         # prepare the game
         if not roomId:
-            self.logger.info('[GameLoop] No room id.')
+            # self.logger.info('[GameLoop] No room id.')
             return None, None
         room = self.restInterface.get_room(roomId)
         members = room.get('members')
         creator = room.get('creator')
         if members is None or creator is None:
-            self.logger.info('[GameLoop] no members or creator key')
+            # self.logger.info('[GameLoop] no members or creator key')
             return None, None
         members.append(creator)
         membersDict = {}
@@ -50,10 +50,10 @@ class SnakeGameExecution(object):
         '''
         Return a list of snakeIds if the loop should be broken, None if the loop should continue
         '''
-        self.logger.info('[GameLoop] tick')
+        # self.logger.info('[GameLoop] tick')
         board.moveAllSnakes()
         state = board.getGameState()
-        self.logger.info('[GameLoop] {}'.format(state))
+        # self.logger.info('[GameLoop] {}'.format(state))
         self.roomManager.publish_to_room(roomId, 'g', state)
         snakes = board.snakes
         if len(snakes) <= 1:
@@ -66,25 +66,28 @@ class SnakeGameExecution(object):
         Run the game loop until end.
         '''
         ### TODO needs to be code reviewed ###
-        self.logger.info('[GameLoop] starting...')
+        # self.logger.info('[GameLoop] starting...')
         board, membersDict = self.prepare(roomId)
         if not board or not membersDict:
-            self.logger.info('[GameLoop] prepare failed!')
+            # self.logger.info('[GameLoop] prepare failed!')
             return
 
         # notify everybody: game starts here!
         self.roomManager.publish_to_room(roomId, 'start')
 
-        self.logger.info('[GameLoop] looping...')
+        # self.logger.info('[GameLoop] looping...')
         # infinite game loop
         while True:
             self.timeProvider.sleep(GAME_TICK_TIME)
             snakes = self.tickOnce(roomId, board, membersDict)
             if snakes is not None: # could be an empty dict
-                winner = snakes[0] if len(snakes) == 1 else None
-                winner = membersDict.get(winner) if winner else None
-                self.roomManager.publish_to_room(roomId, 'end', {
-                    'winner': winner
-                    } if winner else None)
-                self.restInterface.ends_game(roomId)
-                return snakes
+                break
+
+        winnerId = snakes[0] if len(snakes) == 1 else None
+        winner = membersDict.get(winnerId) if winnerId else None
+        self.roomManager.publish_to_room(roomId, 'end', {
+            'winner': winner
+            } if winner else None)
+        self.restInterface.ends_game(roomId)
+        self.restInterface.update_scores(players = membersDict.keys(), winner = winnerId)
+        return snakes
