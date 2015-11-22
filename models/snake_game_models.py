@@ -42,7 +42,7 @@ class Board:
 
     def changeDirection(self, player, direction):
         """
-        Change direction of player to direction
+        Mimics the behavior when a player hits a keystroke
         :param player: playerID (1 to numPlayers)
         :param direction: Direction.UP/DOWN/LEFT/RIGHT (do not allow STAY)
         """
@@ -153,6 +153,7 @@ class Board:
         snake = self.snakes[player] # get the current snake
         if snake.direction == Direction.STAY:
             return
+        snake.applyLastKeyStroke()
         head = snake.body[0]
         newHead = Direction.newPoint(head, snake.direction) # get the position of the new head of the snake
         # check if the snake hits the wall
@@ -225,7 +226,7 @@ class Snake:
         """
         self.verifyBody(bodies)
         self.body = bodies
-        self.direction = direction
+        self.direction = self.lastKeyStroke = direction
 
     def length(self):
         return len(self.body)
@@ -239,17 +240,25 @@ class Snake:
         """
         self.body.insert(0, food) #append to the front of the list
 
-    def changeDirection(self, newDirection):
+    def applyLastKeyStroke(self):
+        """
+        Return true if changing direction to lastKeyStroke is legal
+        """
+        if self.length() == 1 or not Direction.isOppositeDirection(self.direction, self.lastKeyStroke):
+            self.direction = self.lastKeyStroke
+
+    def changeDirection(self, keyStroke):
         """
         Change direction of this snake. Check that the snake is not turning around.
         """
-        if self.length() == 1 or not Direction.isOppositeDirection(self.direction, newDirection): # when the snake's len is 1, any new direction is permitted
-            self.direction = newDirection
+        # if self.length() == 1 or not Direction.isOppositeDirection(self.direction, newDirection): # when the snake's len is 1, any new direction is permitted
+        #     self.direction = newDirection
+        self.lastKeyStroke = keyStroke
 
     def move(self):
         """
         Move the snake in the current direction. Assume no collision to another snake
-        Assume not going outside of the board.
+        Assume not going outside of the board. Assume applyLastKeyStroke is called
         """
         head = self.body[0]
         newHead = Direction.newPoint(head, self.direction)

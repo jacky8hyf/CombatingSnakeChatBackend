@@ -4,7 +4,7 @@ __author__ = 'TrevorTa'
 from .snake_game_models import *
 from unittest import TestCase
 
-class SnakeGameModelsTestCase(TestCase):
+class SnakeTestCase(TestCase):
     def testSnakeInit(self):
         snake = Snake([[1,1]], Direction.UP)
         self.assertTrue(snake.direction == Direction.UP)
@@ -13,6 +13,7 @@ class SnakeGameModelsTestCase(TestCase):
 
     def testMoveSnake(self):
         snake = Snake([(1,1)], Direction.UP)
+        snake.applyLastKeyStroke()
         snake.move()
         self.assertTrue(len(snake.body) == 1)
         self.assertTrue(snake.body[0] == [0,1])
@@ -20,46 +21,61 @@ class SnakeGameModelsTestCase(TestCase):
     def testChangeDirection(self):
         snake = Snake([[1,1]], Direction.UP)
         snake.changeDirection(Direction.DOWN)
+        snake.applyLastKeyStroke()
         # allow to change to opposite direction
         self.assertTrue(snake.direction == Direction.DOWN)
         snake.changeDirection(Direction.LEFT)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.LEFT)
         snake.changeDirection(Direction.STAY)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.STAY)
         snake.changeDirection(Direction.RIGHT)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.RIGHT)
         snake.changeDirection(Direction.LEFT)
-        self.assertTrue(snake.direction == Direction.RIGHT)
+        snake.applyLastKeyStroke()
+        self.assertTrue(snake.direction == Direction.LEFT)
         snake.changeDirection(Direction.UP)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.UP)
 
-    def testChangeDirection(self):
+    def testChangeDirection2(self):
         snake = Snake([[1,1],[1,2]], Direction.UP)
         snake.changeDirection(Direction.DOWN)
+        snake.applyLastKeyStroke()
         # not allow to change to opposite direction
         self.assertTrue(snake.direction == Direction.UP)
         snake.changeDirection(Direction.LEFT)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.LEFT)
         snake.changeDirection(Direction.STAY)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.STAY)
         snake.changeDirection(Direction.RIGHT)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.RIGHT)
         snake.changeDirection(Direction.LEFT)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.RIGHT)
         snake.changeDirection(Direction.UP)
+        snake.applyLastKeyStroke()
         self.assertTrue(snake.direction == Direction.UP)
 
     def testMoveAndChangeDirection(self):
         snake = Snake([[1,1]], Direction.UP)
+        snake.applyLastKeyStroke()
         snake.move()
-        self.assertTrue(len(snake.body) == 1)
-        self.assertTrue(snake.body[0] == [0,1])
+        self.assertEquals(len(snake.body), 1)
+        self.assertEquals(snake.body[0], [0,1])
         snake.changeDirection(Direction.LEFT)
+        snake.applyLastKeyStroke()
         snake.move()
-        self.assertTrue(snake.body[0] == [0,0])
+        self.assertEquals(snake.body[0], [0,0])
         snake.changeDirection(Direction.STAY)
+        snake.applyLastKeyStroke()
         snake.move()
-        self.assertTrue(snake.body[0] == [0,0])
+        self.assertEquals(snake.body[0], [0,0])
 
     def testEatFood(self):
         snake = Snake([[1,1]], Direction.UP)
