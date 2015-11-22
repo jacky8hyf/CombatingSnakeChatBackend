@@ -20,6 +20,22 @@ class SnakeGameModelsTestCase(TestCase):
     def testChangeDirection(self):
         snake = Snake([[1,1]], Direction.UP)
         snake.changeDirection(Direction.DOWN)
+        # allow to change to opposite direction
+        self.assertTrue(snake.direction == Direction.DOWN)
+        snake.changeDirection(Direction.LEFT)
+        self.assertTrue(snake.direction == Direction.LEFT)
+        snake.changeDirection(Direction.STAY)
+        self.assertTrue(snake.direction == Direction.STAY)
+        snake.changeDirection(Direction.RIGHT)
+        self.assertTrue(snake.direction == Direction.RIGHT)
+        snake.changeDirection(Direction.LEFT)
+        self.assertTrue(snake.direction == Direction.RIGHT)
+        snake.changeDirection(Direction.UP)
+        self.assertTrue(snake.direction == Direction.UP)
+
+    def testChangeDirection(self):
+        snake = Snake([[1,1],[1,2]], Direction.UP)
+        snake.changeDirection(Direction.DOWN)
         # not allow to change to opposite direction
         self.assertTrue(snake.direction == Direction.UP)
         snake.changeDirection(Direction.LEFT)
