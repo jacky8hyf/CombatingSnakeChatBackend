@@ -208,7 +208,7 @@ class Board:
             for body in self.snakes[snakeID].body: # select the body of each snake
                 if body == point:
                     return snakeID
-        return 0
+        return 0 # FIXME change it to None later
 
     def generateRandomPoint(self):
         import random

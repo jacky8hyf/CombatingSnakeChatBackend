@@ -289,3 +289,16 @@ class BoardTestCase(TestCase):
         self.assertEquals(len(board.snakes), 2)
         board.moveAllSnakes()
         self.assertEquals(len(board.snakes), 1)
+
+    def testRemoveTail2(self):
+        board = Board(10, 10, [1])
+        lst = [[4,3],[4,4],[3,4],[3,3],[3,2]]
+        board.snakes[1] = Snake(lst, Direction.UP)
+        board.drawBoard()
+        print board.snakes[1].body
+        board.moveAllSnakes()
+        board.drawBoard()
+        print board.snakes[1].body
+        board.moveAllSnakes()
+        board.drawBoard()
+        print board.snakes[1].body
