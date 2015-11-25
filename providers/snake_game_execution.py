@@ -55,10 +55,8 @@ class SnakeGameExecution(object):
         state = board.getGameState()
         # self.logger.info('[GameLoop] {}'.format(state))
         self.roomManager.publish_to_room(roomId, 'g', state)
-        snakes = board.snakes
-        if len(snakes) <= 1:
-            return snakes.keys()
-        return None
+        return board.getWinnerIds()
+
 
     def start(self, roomId=None, *args, **kwargs):
         '''

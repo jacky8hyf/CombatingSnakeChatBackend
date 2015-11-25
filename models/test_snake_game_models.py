@@ -298,3 +298,16 @@ class BoardTestCase(TestCase):
         self.assertEquals([[3, 3], [4, 3], [4, 4], [3, 4]], board.snakes[1].body)
         board.moveAllSnakes()
         self.assertEquals([[2, 3], [3, 3], [4, 3], [4, 4]], board.snakes[1].body)
+
+    def testGetWinnerIds(self):
+        board = Board(10, 10, [1])
+        lst = [[4,3],[4,4],[3,4],[3,3],[3,2]]
+        board.snakes[1] = Snake(lst, Direction.UP)
+        self.assertEquals([1], board.getWinnerIds())
+        
+        board = Board(10, 10, [1,2])
+        board.snakes[1] = Snake(lst, Direction.UP)
+        board.snakes[2] = Snake(lst, Direction.UP)
+        self.assertEquals(None, board.getWinnerIds())
+        
+        lst = [0,0] * SNAKE_MAX_LENGTH

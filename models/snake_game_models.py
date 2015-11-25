@@ -28,6 +28,22 @@ class Board:
             res["_food"] = self.foods
             return res
 
+    @property
+    def getWinnerIds(self):
+        """
+        Return None if there is no winner, [] if the game has ended and
+        drawn, [id] if the game has ended and there is a winner.
+        """
+        with self.lock:
+            if len(self.snakes) == 0:
+                return []
+            if len(self.snakes) == 1:
+                return self.snakes.keys()
+            potentialWinners = [snakeId for (snakeId, snake) in self.snakes.items() if snake.length >= SNAKE_MAX_LENGTH]
+            if potentialWinners:
+                return potentialWinners
+            return None
+
     def moveAllSnakes(self):
         """
         Move all snakes on the board according to each snake's current direction.
@@ -154,6 +170,8 @@ class Board:
         snake.applyLastKeyStroke()
         if snake.direction == Direction.STAY:
             return
+        if len(snake.body) == 0:
+            return # can't move an empty snake
         head = snake.body[0]
         newHead = Direction.newPoint(head, snake.direction) # get the position of the new head of the snake
         # check if the snake hits the wall
@@ -164,7 +182,7 @@ class Board:
                 # print('[LOGIC] killing {} : out of bounds : {}'.format(player, newHead))
             return
         overlappedSnake = self.isPointOnSnake(newHead) # id of the overlapped snake
-        if overlappedSnake == 0: # no snake at this new point
+        if overlappedSnake: # no snake at this new point
             if self.isPointOnFood(newHead):
                 snake.eatFood(newHead) # grow longer
                 self.foods.remove(newHead)
@@ -208,7 +226,7 @@ class Board:
             for body in self.snakes[snakeID].body: # select the body of each snake
                 if body == point:
                     return snakeID
-        return 0 # FIXME change it to None later
+        return None
 
     def generateRandomPoint(self):
         import random
