@@ -9,14 +9,7 @@ project.
 4. `[sudo] pip install -r requirements.txt`
 
 ## Run it locally
-1. Clone the [Django app](/jacky8hyf/CS169CombatingSnake)
-2. In the root of that app, run: `[PORT=8080] heroku local`; you need to specify
-   the port manually if it is not 8080 by default. If you don't want it to run on
-   port 8080, you need to specify the `REST_HOST` environment variable below.
-3. Simply run `[REST_HOST=http://localhost:8080] PORT=8081 heroku local`
-   in the root of this repository! It should recognize the REST host being run
-   on port 8080 by default.
-4. Now, you can use `wscat` or your favorite tool to connect to `ws://localhost:8081`
+[Link](/jacky8hyf/CS169CombatingSnake#run-it-locally)
 
 ## Test it
 Many of the tests are highly dependent on the [Django app](/jacky8hyf/CS169CombatingSnake);
