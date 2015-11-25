@@ -294,11 +294,7 @@ class BoardTestCase(TestCase):
         board = Board(10, 10, [1])
         lst = [[4,3],[4,4],[3,4],[3,3],[3,2]]
         board.snakes[1] = Snake(lst, Direction.UP)
-        board.drawBoard()
-        print board.snakes[1].body
         board.moveAllSnakes()
-        board.drawBoard()
-        print board.snakes[1].body
+        self.assertEquals([[3, 3], [4, 3], [4, 4], [3, 4]], board.snakes[1].body)
         board.moveAllSnakes()
-        board.drawBoard()
-        print board.snakes[1].body
+        self.assertEquals([[2, 3], [3, 3], [4, 3], [4, 4]], board.snakes[1].body)

@@ -268,7 +268,9 @@ class Snake:
         Hurt the snake by remove the tail of the snake
         """
         if len(self.body) > 0:
-            self.body.remove(self.body[-1]) # remove the tail of the snake
+            self.body.pop()
+            # self.body.remove(self.body[-1]) # remove the tail of the snake
+
 
 
 class Direction:
