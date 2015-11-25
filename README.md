@@ -9,13 +9,13 @@ project.
 4. `[sudo] pip install -r requirements.txt`
 
 ## Run it locally
-[Link](/jacky8hyf/CS169CombatingSnake#run-it-locally)
+[Link](https://github.com/jacky8hyf/CS169CombatingSnake#run-it-locally)
 
 ## Test it
-Many of the tests are highly dependent on the [Django app](/jacky8hyf/CS169CombatingSnake);
+Many of the tests are highly dependent on the [Django app](https://github.com/jacky8hyf/CS169CombatingSnake);
 so you need to have that app running on a different process.
 
-1. Clone the [Django app](/jacky8hyf/CS169CombatingSnake)
+1. Clone the [Django app](https://github.com/jacky8hyf/CS169CombatingSnake)
 2. In the root of that app, run: `[PORT=8080] heroku local`; you need to specify
    the port manually if it is not 8080 by default. If you don't want it to run on
    port 8080, you need to specify the `REST_HOST` environment variable below.
@@ -26,7 +26,7 @@ so you need to have that app running on a different process.
    checks for iteration 2.
 
 Below is the original README for the Python Websockets example. The original repository
-is [here](/heroku-examples/python-websockets-chat).
+is [here](https://github.com/heroku-examples/python-websockets-chat).
 
 # Python Websockets Example: Chat
 
