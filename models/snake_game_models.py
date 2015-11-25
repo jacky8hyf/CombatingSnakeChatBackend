@@ -28,7 +28,6 @@ class Board:
             res["_food"] = self.foods
             return res
 
-    @property
     def getWinnerIds(self):
         """
         Return None if there is no winner, [] if the game has ended and
@@ -39,7 +38,7 @@ class Board:
                 return []
             if len(self.snakes) == 1:
                 return self.snakes.keys()
-            potentialWinners = [snakeId for (snakeId, snake) in self.snakes.items() if snake.length >= SNAKE_MAX_LENGTH]
+            potentialWinners = [snakeId for (snakeId, snake) in self.snakes.items() if snake.length() >= SNAKE_MAX_LENGTH]
             if potentialWinners:
                 return potentialWinners
             return None
@@ -182,7 +181,7 @@ class Board:
                 # print('[LOGIC] killing {} : out of bounds : {}'.format(player, newHead))
             return
         overlappedSnake = self.isPointOnSnake(newHead) # id of the overlapped snake
-        if overlappedSnake: # no snake at this new point
+        if not overlappedSnake: # no snake at this new point
             if self.isPointOnFood(newHead):
                 snake.eatFood(newHead) # grow longer
                 self.foods.remove(newHead)
